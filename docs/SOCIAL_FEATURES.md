@@ -63,6 +63,18 @@ Each situation has multiple short prompts, shown **one card at a time**. The bro
 
 ## Main limitations and next milestone
 
-**Current limitation:** A user has to use phone/browser controls to change cards. That defeats the goal of keeping attention on the other person.
+## Automatic cue preview — implemented in browser, not yet on glasses
 
-**Next milestone:** An optional timed-cue browser demo, then a real-device adapter with a verified supported background/scheduling approach. Actual autonomous prompts on the event glasses require the exact SDK and physical testing; a normal phone browser may stop running timers when locked or backgrounded.
+- Select a person in Conversation Starter or a situation in Social Navigator.
+- Choose an interval of **10 seconds (quick demo), 30 seconds, 1 minute, or 2 minutes**.
+- Press **Start automatic preview** once. The browser preview clears, then shows each saved card at the selected interval for **7 seconds**, then clears it again.
+- The finite sequence ends after each card has been shown once. Users can stop early, or use manual Back / Next / Hide controls.
+- Changing the selected person, feature, or situation stops the old sequence.
+- Hiding/locking the browser page stops the demo rather than implying a background service. Timed cards are **not automatically projected to the glasses**.
+- The display packet format is unchanged, so the teammate can eventually connect the same show and clear events to a **verified on-device SDK**.
+
+**Code:** `src/core/cue-timing.js` (pure schedule), `src/social-app.js` (browser scheduling), `social.html` and `src/social.css` (controls), `tests/cue-timing.test.mjs` (schedule tests).
+
+## Next hardware milestone
+
+Actual wearable prompts while the phone is locked require **documented SDK support**, a verified phone-to-glasses connection, and a background-capable runtime (or on-device scheduler). A normal mobile web page is not a reliable locked-phone timer. No real-glasses feature is claimed until tested on the physical event hardware.

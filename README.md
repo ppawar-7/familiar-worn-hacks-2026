@@ -2,54 +2,44 @@
 
 **Looks Familiar. Sounds Familiar. Feels Familiar.**
 
-FAMILIAR is a phone companion for smart glasses. The phone is where the wearer chooses context and saves detail; the glasses are intended to show one short, glanceable cue at the right moment.
+FAMILIAR is a hackathon project about staying present, remembering context, and getting discreet prompts when they're useful.
 
-## Social features
+## Our three features
 
-- **Conversation Starter:** save, search, edit, and delete notes about people you choose to remember. The app turns those notes into short cards for reconnecting.
-- **Social Navigator:** choose from eight situations — meeting someone, joining a group, networking, dating / a first date, a job interview, continuing a conversation, reconnecting, or wrapping up — and browse concise, optional prompts.
-- **Phone-first design:** large touch targets, a mobile bottom feature switcher, compact forms, responsive layouts, and a one-card glasses preview.
-- **Privacy:** profiles are manually entered and stored in this browser only. There is no face recognition, camera capture, automatic listening, cloud sync, or account system.
+1. **Proximity Alerts** — teammate-led demonstration of simulated phone-distraction and distance alerts; not a real-world safety system.
+2. **Conversation Starter** — search and save notes about people, then view reminders and follow-up ideas.
+3. **Social Navigator** — select from eight situations, including networking and first dates, for optional conversation cues.
 
-## Run the phone/browser prototype
+**[Open FAMILIAR's hosted phone demo](https://familiar-familiar6.vercel.app/social.html)** (Vercel team login may be required).
 
-From the project folder:
+**[What we've built and how the teammate can use it](docs/SOCIAL_FEATURES.md)** — feature-by-feature status, where the code lives, browser limitations, and the hardware integration checklist.
 
-~~~powershell
-py -m http.server 8000
-~~~
+## A new hands-free-style demo: timed cues
 
-Open **http://localhost:8000/social.html** for Conversation Starter and Social Navigator. The page is responsive and can be opened in a phone browser on the same local network if the computer firewall permits it.
+In Conversation Starter or Social Navigator:
 
-Run the logic tests (Node.js required):
+1. Choose a person or a social situation.
+2. Choose **10 seconds, 30 seconds, 1 minute, or 2 minutes** between cards.
+3. Press **Start automatic preview**.
+4. The browser shows each card for **7 seconds** and then clears it. It finishes after the last card, or you can stop it sooner.
 
-~~~powershell
-npm test
-~~~
+This solves manual card switching *in the browser demo while the tab remains open and visible*. It **does not** yet solve real locked-phone hands-free delivery. Mobile browsers can suspend timers when backgrounded or the phone is locked. Real glasses delivery still requires verified official device APIs and a supported background/native runtime.
 
-## How this fits the Worn brief
+## Phone and glasses responsibilities
 
-The Worn 2026 theme is **Second Nature**. FAMILIAR is primarily aimed at:
+- **Phone:** chooses the person/situation, manages the saved context and optional timing.
+- **Wearable (planned):** one short cue at a time with next / previous / dismiss support if the actual hardware permits it.
+- **Today:** a green text preview and device-neutral show / clear messages, not a tested phone-to-glasses connection. No camera, face recognition, listening, emotion detection, or cloud account integration.
 
-- **Seamless Handoff:** use the phone to choose a person or social moment, then send a concise cue through a hardware-independent display message.
-- **Natural Interaction:** keep the glasses output to one short card at a time, with simple next / previous / dismiss actions.
-- **Personal Insight:** use only context the wearer intentionally saves, rather than silently identifying or profiling other people.
+Browser profiles are manually entered and stored only on that device. **The source repository is public; never add real private profiles or photographs to the repo.** Save only details you have permission to keep.
 
-The event brief calls for a live on-device demo. The current social app is still a browser prototype: the glasses preview and display events are not a physical device connection. A hardware teammate must connect the display contract to the official SDK and verify it on the exact event glasses before claiming on-device integration.
+## For teammates
 
-## Display handoff contract
+- UI: `social.html`, `src/social.css`
+- Profiles, controls, timing runner: `src/social-app.js`
+- Conversation and situation prompts: `src/core/social-cues.js`
+- Deterministic cue schedule: `src/core/cue-timing.js`
+- Generic message contract and adapter: `src/hardware/display-contract.js`, `src/hardware/display-events.js`, `src/hardware/display-adapter.js`
+- Tests: `npm test` (Node.js). GitHub Actions also runs the tests when changes are pushed.
 
-The app publishes **FAMILIAR Display Contract v1** through the event name familiar:display-message:
-
-- **schema:** contract version
-- **feature:** conversation or navigator
-- **visible:** show a card or clear the display
-- **title and body:** short display text
-- **cardIndex and cardCount:** current position
-- **actions:** logical previous, next, and dismiss actions
-
-A verified hardware adapter can subscribe with onDisplayMessage(handler). The reverse direction is prepared through publishDisplayAction(action) and onDisplayAction(handler). These events are local to the same JavaScript runtime; they do not provide a phone-to-glasses network connection by themselves. The real adapter must use only documented SDK methods.
-
-## Privacy and safety
-
-Use fictional sample data or information a person has agreed you can save. Do not commit personal profiles or photos to GitHub. The app does not use face recognition or record conversations. Social prompts are optional suggestions, not scripts or claims about what another person is thinking.
+To connect real glasses, first confirm the exact model and SDK, get a simple text message onto the physical display, and only then connect the verified SDK to FAMILIAR's show/clear messages. Do not assume buttons, camera access, or reliable background delivery.
