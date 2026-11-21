@@ -11,8 +11,8 @@
 <body>
   <main class="shell">
     <header class="social-header">
-      <nav class="breadcrumb" aria-label="Project pages"><a href="./index.html">← Proximity demo</a><span> / </span><strong>Social features</strong></nav>
-      <div class="eyebrow">TEAM FAMILIAR / EXPERIMENTS 02 + 03</div>
+      <nav class="breadcrumb" aria-label="Three FAMILIAR features"><a href="./index.html#proximity">01 · Proximity Alerts</a><a href="#conversation" id="social-link-conversation">02 · Conversation Starter</a><a href="#navigator" id="social-link-navigator">03 · Social Navigator</a></nav>
+      <div class="eyebrow">FAMILIAR · FEATURE 02 + 03</div>
       <h1>Conversation Starter.<br><span>Social Navigator.</span></h1>
       <p class="intro">The right words at the right moment. Built for a green monochrome glasses display, currently tested in the browser.</p>
     </header>
@@ -25,17 +25,21 @@
       <section class="panel social-controls" id="conversation-panel" role="tabpanel" aria-labelledby="conversation-tab">
         <div class="section-label">OPTIONAL MANUAL NOTES</div>
         <h2>Teach one person</h2>
-        <p class="note-block">No photo required. Enter a nickname and a conversation detail you already know. Nothing is recognized automatically.</p>
+        <p class="note-block">Write down what you want to remember about someone you met. Use Next cue to flip through short cards. No face recognition.</p>
         <form id="person-form">
           <label for="person-name">Name or nickname (optional)</label>
           <input type="text" id="person-name" maxlength="40" autocomplete="off" placeholder="e.g. Alex (fictional)" />
+          <label for="person-met">Where you met</label>
+          <input type="text" id="person-met" maxlength="90" autocomplete="off" placeholder="e.g. Worn Hacks" />
+          <label for="person-background">Background</label>
+          <input type="text" id="person-background" maxlength="100" autocomplete="off" placeholder="e.g. CS graduate student" />
           <label for="person-interest">Interest</label>
           <input type="text" id="person-interest" maxlength="60" autocomplete="off" placeholder="e.g. sci-fi movies" />
           <label for="person-topic">Last topic discussed</label>
           <input type="text" id="person-topic" maxlength="90" autocomplete="off" placeholder="e.g. the design workshop" />
           <label for="person-note">Optional note</label>
           <textarea id="person-note" maxlength="140" rows="2" placeholder="e.g. Ask how their presentation went"></textarea>
-          <div class="inline-actions"><button type="submit" class="primary-action">Use these notes</button><button type="button" id="example-person" class="secondary-action">Use fictional example</button></div>
+          <div class="inline-actions"><button type="submit" class="primary-action">Use these notes</button><button type="button" id="example-person" class="secondary-action">Try Sunny demo</button></div>
         </form>
         <div class="storage-actions"><button type="button" id="save-person" class="secondary-action">Save on this browser</button><button type="button" id="clear-person" class="text-action">Clear saved notes</button></div>
         <p class="subtle">Saved notes stay in this browser's local storage unless you manually remove them. Do not enter sensitive information or private participant details.</p>
@@ -63,8 +67,8 @@
           <div class="social-hud-cue"><div class="social-hud-title" id="cue-title">START WITH CURIOSITY</div><div class="social-hud-subtitle" id="cue-subtitle">What has been exciting lately?</div></div>
           <div class="hud-end">USER-SELECTED · NOT AUTOMATIC</div>
         </div>
-        <p id="progress-label" class="progress-label">Cue 1 of 3</p>
-        <div class="inline-actions"><button type="button" id="prev-cue" class="secondary-action">← Previous</button><button type="button" id="next-cue" class="primary-action">Next cue →</button><button type="button" id="dismiss-cue" class="text-action">Dismiss</button></div>
+        <p id="progress-label" class="progress-label">Card 1 of 3</p>
+        <div class="inline-actions"><button type="button" id="prev-cue" class="secondary-action">← Previous</button><button type="button" id="next-cue" class="primary-action">Next card →</button><button type="button" id="dismiss-cue" class="text-action">Dismiss</button></div>
         <div class="display-options">
           <div><label for="display-size">Text size (preview only)</label><select id="display-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></div>
           <div><label for="display-place">Text position (preview only)</label><select id="display-place"><option value="top">Top</option><option value="center" selected>Center</option><option value="bottom">Bottom</option></select></div>

@@ -3,58 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Familiar | Worn Hacks 2026</title>
+  <title>FAMILIAR · Three features</title>
   <link rel="stylesheet" href="./src/styles.css" />
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
   <main class="shell">
     <header>
-      <div class="eyebrow">WORN HACKS 2026 · TEAM FAMILIAR</div>
-      <h1>Looks familiar.<br>Sounds familiar.<br><span>Feels familiar.</span></h1>
-      <p class="intro">Team Familiar builds glanceable, contextual smart-glasses experiences. Our first experiment is a staged proximity-and-attention alert.</p>
+      <div class="eyebrow">WORN HACKS · TEAM FAMILIAR</div>
+      <h1>FAMILIAR<span>.</span></h1>
+      <p class="intro">Looks Familiar. Sounds Familiar. Feels Familiar.<br>Three ideas. One pair of glasses. One simple experience.</p>
     </header>
-    <aside class="warning" role="note"><strong>SIMULATED INPUT · NOT A SAFETY DEVICE</strong><p>Inputs are staged: this demo does not detect actual roads, rails, phone usage, people, distances, or obstacles. Do not use it for navigation or hazard avoidance.</p></aside>
-    <section class="workspace" aria-label="Prototype controls and glasses preview">
-      <div class="control panel">
-        <div class="section-label">01 / MANUALLY STAGED INPUT</div>
-        <h2>Stage a scenario</h2>
-        <p class="helper">Quick judge demo — tap each state, or adjust the controls below.</p>
-        <div class="presets" role="group" aria-label="Preset simulated demo states">
-          <button type="button" data-preset="idle">1 · Idle</button>
-          <button type="button" data-preset="caution">2 · Caution</button>
-          <button type="button" data-preset="warning">3 · Warning</button>
-          <button type="button" data-preset="reset">Reset</button>
+    <nav class="feature-chooser" aria-label="Choose one of our three features">
+      <a class="feature-choice selected" href="#proximity" aria-current="page"><span>01</span><strong>Proximity Alerts</strong><small>Try simulated alerts</small></a>
+      <a class="feature-choice" href="./social.html#conversation"><span>02</span><strong>Conversation Starter</strong><small>Remember someone you met</small></a>
+      <a class="feature-choice" href="./social.html#navigator"><span>03</span><strong>Social Navigator</strong><small>Find the right words</small></a>
+    </nav>
+    <section id="proximity" aria-labelledby="proximity-heading">
+      <div class="feature-heading"><div><div class="section-label">FEATURE 01</div><h2 id="proximity-heading">Proximity Alerts</h2></div><span class="feature-status">SIMULATION</span></div>
+      <aside class="warning" role="note"><strong>BROWSER DEMO ONLY</strong><p>Distance and phone attention are entered manually. No road, rail, obstacle, or actual phone-use detection. Not for navigation or safety.</p></aside>
+      <section class="workspace" aria-label="Prototype controls and glasses preview">
+        <div class="control panel">
+          <div class="section-label">TEST INPUTS</div>
+          <h2>Choose a scenario</h2>
+          <p class="helper">Tap a preset or use the controls below.</p>
+          <div class="presets" role="group" aria-label="Preset simulated demo states">
+            <button type="button" data-preset="idle">Idle</button>
+            <button type="button" data-preset="caution">Caution</button>
+            <button type="button" data-preset="warning">Warning</button>
+            <button type="button" data-preset="reset">Reset</button>
+          </div>
+          <label for="scenario">Mock environment</label>
+          <select id="scenario">
+            <option value="none">Nothing staged</option>
+            <option value="object">Object ahead (demo)</option>
+            <option value="road">Mock road boundary (demo)</option>
+            <option value="rail">Mock platform boundary (demo)</option>
+          </select>
+          <label class="toggle" for="phone"><input type="checkbox" id="phone" checked /> Demo wearer looking at phone</label>
+          <label for="distance">Simulated distance <strong><output id="meters">6.0 m</output></strong></label>
+          <input id="distance" type="range" min="0.5" max="8" step="0.1" value="6" />
+          <div class="range-labels"><span>0.5 m</span><span>8.0 m</span></div>
+          <button type="button" id="sound" aria-pressed="false">Enable browser sound</button>
+          <p class="note">Sound plays only on a new warning and only after enabling it.</p>
         </div>
-        <label for="scenario">Simulated environment</label>
-        <select id="scenario">
-          <option value="none">No staged object</option>
-          <option value="object">Object ahead (demo)</option>
-          <option value="road">Mock road boundary (demo)</option>
-          <option value="rail">Mock platform boundary (demo)</option>
-        </select>
-        <label class="toggle" for="phone"><input type="checkbox" id="phone" checked /> Demo wearer is looking at phone</label>
-        <label for="distance">Simulated distance <strong><output id="meters">6.0 m</output></strong></label>
-        <input id="distance" type="range" min="0.5" max="8" step="0.1" value="6" />
-        <div class="range-labels"><span>0.5 m</span><span>8.0 m</span></div>
-        <button type="button" id="sound" aria-pressed="false">Enable browser sound</button>
-        <p class="note">Optional tone plays only on a new warning transition and after user activation.</p>
-      </div>
-      <div class="preview panel">
-        <div class="section-label">02 / GREEN HUD PREVIEW</div>
-        <h2>Glasses-style preview</h2>
-        <p class="connection" role="status">● BROWSER ONLY · GLASSES NOT CONNECTED</p>
-        <div class="hud-frame" id="hud" data-level="idle" aria-live="polite" aria-atomic="true">
-          <div class="hud-top"><span>FAMILIAR</span><span class="signal">● DEMO</span></div>
-          <div class="hud-mid"><div class="hud-icon">⌁</div><div id="hud-main">NO SIMULATED ALERT</div></div>
-          <div id="hud-detail">Waiting for test scenario</div>
+        <div class="preview panel">
+          <div class="section-label">GREEN DISPLAY PREVIEW</div>
+          <h2>What a cue could look like</h2>
+          <p class="connection" role="status">● BROWSER ONLY · GLASSES NOT CONNECTED</p>
+          <div class="hud-frame" id="hud" data-level="idle" aria-live="polite" aria-atomic="true">
+            <div class="hud-top"><span>FAMILIAR</span><span class="signal">● DEMO</span></div>
+            <div class="hud-mid"><div class="hud-icon">⌁</div><div id="hud-main">NO SIMULATED ALERT</div></div>
+            <div id="hud-detail">Waiting for test scenario</div>
+          </div>
+          <p class="note" id="status">Manual browser demo, not glasses output.</p>
+          <details class="debug"><summary>View demo message data</summary><pre id="cue-json"></pre></details>
         </div>
-        <p class="note" id="status">Waiting for input. The green preview is a browser simulation, not verified glasses output.</p>
-        <details class="debug"><summary>Technical: simulated display frame</summary><pre id="cue-json"></pre><p class="note">This JSON is a proposed integration contract, NOT a supported MicroLumin SDK request.</p></details>
-      </div>
+      </section>
     </section>
-    <section class="panel" style="margin-top:18px"><div class="section-label">EXPERIMENTS 02 + 03 / NO HARDWARE REQUIRED</div><h2 style="margin:9px 0">Conversation Starter + Social Navigator</h2><p class="note" style="margin:0 0 14px">Build these social cue prototypes independently while the team tests the glasses. Prompts are manually selected, with no face recognition.</p><a href="./social.html" style="color:#a8ffbf;font-weight:800">Open social demos →</a></section>
-    <footer><span>FIRST EXPERIMENT / PROXIMITY</span><span>MORE MODULES: VISUAL RECALL · AUDIO RECALL · SOCIAL CUES</span></footer>
+    <footer><span>FAMILIAR · 3 FEATURES</span><span>WORKING PROTOTYPE · NOT A REAL-WORLD ALERT SYSTEM</span></footer>
   </main>
 </body>
 </html>

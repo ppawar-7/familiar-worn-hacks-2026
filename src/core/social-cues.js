@@ -55,6 +55,8 @@ export function normalizePerson(person = {}) {
   }
   return Object.freeze({
     name: cleanText(person.name, 40),
+    metAt: cleanText(person.metAt, 90),
+    background: cleanText(person.background, 100),
     interest: cleanText(person.interest, 60),
     lastTopic: cleanText(person.lastTopic, 90),
     note: cleanText(person.note, 140),
@@ -64,6 +66,8 @@ export function normalizePerson(person = {}) {
 export function conversationSuggestions(person = {}) {
   const p = normalizePerson(person);
   const list = [];
+  if (p.name) list.push({ title: p.name.toUpperCase(), subtitle: p.metAt ? `You met at ${p.metAt}` : 'Someone you chose to remember' });
+  if (p.background) list.push({ title: 'REMEMBER', subtitle: p.background });
   if (p.interest) list.push({ title: 'ASK ABOUT AN INTEREST', subtitle: `Ask about ${p.interest}` });
   if (p.lastTopic) list.push({ title: 'PICK UP THE THREAD', subtitle: `Follow up on ${p.lastTopic}` });
   if (p.note) list.push({ title: 'REMEMBER YOUR NOTE', subtitle: p.note });

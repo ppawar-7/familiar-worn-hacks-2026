@@ -15,3 +15,16 @@
 .debug summary{cursor:pointer;font-weight:700}
 .debug pre{overflow:auto;white-space:pre-wrap;color:#a1ffc0;font-size:12px}
 @media(prefers-reduced-motion:reduce){#hud[data-level=warning] .hud-mid{animation:none}}
+
+/* FAMILIAR: exactly three features */
+.feature-chooser{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 30px}
+.feature-choice{display:flex;flex-direction:column;gap:3px;min-height:124px;text-decoration:none;color:#e2f6e9;background:#14281d;border:1px solid #3b6548;border-radius:15px;padding:17px 18px;transition:border-color .15s,background .15s}
+.feature-choice:hover,.feature-choice:focus-visible{outline:2px solid #8af6ac;outline-offset:2px;background:#1e3928}
+.feature-choice.selected{border-color:#85eaa3;background:#193523}
+.feature-choice span{color:#8cf3a9;font:700 12px ui-monospace,monospace}
+.feature-choice strong{font-size:17px}
+.feature-choice small{color:#a5c9af;font-size:12px}
+.feature-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 0 15px}
+.feature-heading h2{font-size:26px;margin:4px 0 0}
+.feature-status{font:700 11px ui-monospace,monospace;letter-spacing:.09em;color:#ffe0af;background:#372d1d;border:1px solid #7e6640;padding:6px 9px;border-radius:7px}
+@media(max-width:700px){.feature-chooser{grid-template-columns:1fr}.feature-choice{min-height:0}}

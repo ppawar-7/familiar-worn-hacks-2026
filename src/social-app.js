@@ -9,7 +9,7 @@ const navigatorTab = $('#navigator-tab');
 const conversationPanel = $('#conversation-panel');
 const navigatorPanel = $('#navigator-panel');
 const personFields = {
-  name: $('#person-name'), interest: $('#person-interest'),
+  name: $('#person-name'), metAt: $('#person-met'), background: $('#person-background'), interest: $('#person-interest'),
   lastTopic: $('#person-topic'), note: $('#person-note'),
 };
 
@@ -49,7 +49,7 @@ function render() {
   // textContent prevents notes from being interpreted as HTML.
   $('#cue-title').textContent = dismissed ? 'CUE DISMISSED' : frame.title;
   $('#cue-subtitle').textContent = dismissed ? 'Nothing displayed in this preview' : frame.subtitle;
-  $('#progress-label').textContent = dismissed ? 'Dismissed · press Next cue to resume' : `Cue ${(cueIndex % getTotal()) + 1} of ${getTotal()}`;
+  $('#progress-label').textContent = dismissed ? 'Dismissed · press Next cue to resume' : `Card ${(cueIndex % getTotal()) + 1} of ${getTotal()}`;
   $('#social-frame-json').textContent = JSON.stringify(dismissed ? { ...frame, title: '', subtitle: '', dismissed: true } : frame, null, 2);
 }
 
@@ -90,12 +90,12 @@ $('#person-form').addEventListener('submit', (event) => {
 });
 
 $('#example-person').addEventListener('click', () => {
-  person = normalizePerson({ name: 'Alex (fictional)', interest: 'sci-fi movies', lastTopic: 'the design workshop', note: 'Ask about the prototype demo' });
+  person = normalizePerson({ name: 'Sunny (fictional demo)', metAt: 'a hackathon', background: 'Computer science graduate student', interest: 'AI and wearable tech', lastTopic: 'his hackathon project', note: 'Ask how the prototype went' });
   fillFields(person);
   cueIndex = 0;
   dismissed = false;
   chooseFeature('conversation');
-  showStatus('Fictional example loaded. Nothing stored or detected.');
+  showStatus('Fictional Sunny example loaded. Manually selected; nothing recognized or stored.');
 });
 
 $('#save-person').addEventListener('click', () => {
@@ -128,6 +128,10 @@ $('#display-font').addEventListener('change', render);
 $('#next-cue').addEventListener('click', () => { cueIndex = (cueIndex + 1) % getTotal(); dismissed = false; render(); });
 $('#prev-cue').addEventListener('click', () => { cueIndex = (cueIndex - 1 + getTotal()) % getTotal(); dismissed = false; render(); });
 $('#dismiss-cue').addEventListener('click', () => { dismissed = true; render(); });
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#navigator') chooseFeature('navigator');
+  if (location.hash === '#conversation') chooseFeature('conversation');
+});
 
 try {
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -139,4 +143,5 @@ try {
 } catch {
   showStatus('Local storage unavailable. All features still work without saving.');
 }
-render();
+if (location.hash === '#navigator') chooseFeature('navigator');
+else render();
