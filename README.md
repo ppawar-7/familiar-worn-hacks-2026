@@ -32,9 +32,7 @@ npm test
 
 ## How the glasses teammate connects this later
 
-The social logic is separate from hardware. Both features produce a small message object using **FAMILIAR Display Contract v1**, implemented in `src/hardware/display-contract.js`.
-
-A message contains:
+The social features send a small message using **FAMILIAR Display Contract v1**:
 - `schema`: contract version
 - `feature`: `conversation` or `navigator`
 - `visible`: show a card or clear the display
@@ -42,7 +40,9 @@ A message contains:
 - `cardIndex` and `cardCount`: current position
 - `actions`: logical `previous`, `next`, and `dismiss` actions
 
-The teammate can map those fields to the **actual documented glasses SDK** after getting one real text message to display on the physical glasses. The contract is not itself an SDK call. Display size, font, coordinates, buttons, camera, and face recognition are not assumed.
+The app publishes each message through the `familiar:display-message` event in `src/hardware/display-events.js`. A future device adapter can subscribe with `onDisplayMessage(handler)` and translate the message using the **actual documented glasses SDK**.
+
+This event and message format are our own handoff contract, not a device SDK. The teammate must verify the exact display API and test a message on the physical glasses before claiming integration. Display size, font, coordinates, buttons, camera, and face recognition are not assumed.
 
 The current browser preview is not connected to the glasses. No hardware capability is claimed as verified.
 

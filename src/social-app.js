@@ -6,6 +6,7 @@ import {
   navigatorFrame,
 } from './core/social-cues.js';
 import { createDisplayMessage } from './hardware/display-contract.js';
+import { publishDisplayMessage } from './hardware/display-events.js';
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE_KEY = 'familiar:people:v2';
@@ -162,6 +163,8 @@ function render() {
     ...frame,
     visible: !dismissed,
   });
+  // The future glasses adapter can subscribe to this event; no SDK is called here.
+  publishDisplayMessage(message);
 
   $('#cue-title').textContent = dismissed ? 'CARD DISMISSED' : message.title;
   $('#cue-subtitle').textContent = dismissed ? 'Choose Next card to continue' : message.body;
