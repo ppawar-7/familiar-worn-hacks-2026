@@ -1,0 +1,22 @@
+name: Test FAMILIAR
+on:
+  push:
+    branches: [main, feature/timed-social-cues]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/social-app.js
+          node --check src/core/social-cues.js
+          node --check src/core/cue-timing.js
+      - name: Run all tests
+        run: npm test
