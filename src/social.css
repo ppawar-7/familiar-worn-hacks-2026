@@ -153,3 +153,5 @@ button:focus-visible,a:focus-visible { outline:2px solid #baffca; outline-offset
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+.people-list > [role=listitem] { min-width:0; }
+.sample-button { margin:0; }
