@@ -132,10 +132,11 @@ function renderPeople() {
     peopleList.append(empty);
   } else {
     for (const person of filtered) {
+      const item = document.createElement('div');
+      item.setAttribute('role', 'listitem');
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'person-choice';
-      button.setAttribute('role', 'listitem');
       button.setAttribute('aria-pressed', String(person.id === selectedPersonId));
 
       const avatar = document.createElement('span');
@@ -167,7 +168,8 @@ function renderPeople() {
         showForm(false);
         render();
       });
-      peopleList.append(button);
+      item.append(button);
+      peopleList.append(item);
     }
   }
 
@@ -323,8 +325,8 @@ $('#example-person').addEventListener('click', () => {
     metAt: 'Worn Hacks',
     background: 'Computer science graduate student',
     interest: 'AI, smart glasses and building things',
-    lastTopic: 'His hackathon project',
-    note: 'Ask how the project and demo went.',
+    lastTopic: 'Their hackathon project',
+    note: 'Ask how their project and demo went.',
   });
   const existingIndex = profiles.findIndex((person) => person.id === sample.id);
   if (existingIndex >= 0) profiles[existingIndex] = sample;
