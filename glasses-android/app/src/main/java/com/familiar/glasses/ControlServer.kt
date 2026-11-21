@@ -145,7 +145,7 @@ class ControlServer(private val context: Context, private val port: Int) : Threa
                         CueRuntime.choosePreset(id) && CueRuntime.begin(seconds)
                     }
                     if (success) {
-                        onUi { AppLauncher.open(context); true }
+                        onUi { AppLauncher.open(context, id); true }
                         ok(JSONObject().put("ok",true))
                     } else Reply(422, "{\"ok\":false,\"error\":\"invalid preset or interval\"}")
                 }
@@ -163,7 +163,7 @@ class ControlServer(private val context: Context, private val port: Int) : Threa
                         CueRuntime.setCustomCards(cards,"Phone-selected DEMO") && CueRuntime.begin(seconds)
                     }
                     if (success) {
-                        onUi { AppLauncher.open(context); true }
+                        onUi { AppLauncher.open(context, "sunny"); true }
                         ok(JSONObject().put("ok",true))
                     } else Reply(422, "{\"ok\":false,\"error\":\"invalid demo card\"}")
                 }

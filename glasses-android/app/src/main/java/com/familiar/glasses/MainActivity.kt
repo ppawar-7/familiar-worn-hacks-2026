@@ -44,6 +44,7 @@ class MainActivity : Activity() {
         camera = CameraPresence { message ->
             runOnUiThread { cameraStatus = message; render() }
         }
+        selectIntentMode(intent)
         startForegroundService(Intent(this, KeepAliveService::class.java))
     }
 
@@ -64,7 +65,14 @@ class MainActivity : Activity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        selectIntentMode(intent)
         render()
+    }
+
+    private fun selectIntentMode(intent: Intent?) {
+        val mode = intent?.getStringExtra("familiar_mode") ?: return
+        val index = modes.indexOf(mode)
+        if (index >= 0) selectedMode = index
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
