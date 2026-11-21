@@ -9,17 +9,20 @@ import { createDisplayMessage } from './hardware/display-contract.js';
 import { publishDisplayMessage, onDisplayAction } from './hardware/display-events.js';
 
 const $ = (selector) => document.querySelector(selector);
-const STORAGE_KEY = 'familiar:people:v2';
-const LEGACY_STORAGE_KEY = 'familiar:manual-person:v1';
+const STORAGE_KEY = 'familiar:people:v3';
+const PREVIOUS_STORAGE_KEYS = ['familiar:people:v2', 'familiar:manual-person:v1'];
 
 const conversationTab = $('#conversation-tab');
 const navigatorTab = $('#navigator-tab');
 const conversationPanel = $('#conversation-panel');
 const navigatorPanel = $('#navigator-panel');
 const peopleList = $('#people-list');
+const peopleSearch = $('#people-search');
+const personFormCard = $('#person-form-card');
 const personForm = $('#person-form');
 const personFields = {
   name: $('#person-name'),
+  relationship: $('#person-relationship'),
   metAt: $('#person-met'),
   background: $('#person-background'),
   interest: $('#person-interest'),
@@ -30,6 +33,7 @@ const personFields = {
 let profiles = loadProfiles();
 let selectedPersonId = profiles[0]?.id ?? null;
 let selectedFeature = 'conversation';
+let activeSituation = 'meet';
 let cardIndex = 0;
 let dismissed = false;
 let editingPersonId = null;
@@ -39,25 +43,38 @@ function makeId() {
   return `person-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 }
 
+function safeReadStorage(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 function loadProfiles() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (Array.isArray(saved)) {
-      return saved.map((person) => normalizePerson(person)).filter((person) => person.id && person.name);
+    const current = safeReadStorage(STORAGE_KEY);
+    if (Array.isArray(current)) {
+      return current.map((person) => normalizePerson(person)).filter((person) => person.id && person.name);
     }
-
-    // One-time migration from the earlier single-profile prototype.
-    const legacy = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || 'null');
-    if (legacy && typeof legacy === 'object') {
-      const migrated = normalizePerson({ ...legacy, id: makeId() });
-      if (migrated.name) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([migrated]));
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-        return [migrated];
+    for (const key of PREVIOUS_STORAGE_KEYS) {
+      const saved = safeReadStorage(key);
+      if (Array.isArray(saved)) {
+        const migrated = saved.map((person) => normalizePerson(person)).filter((person) => person.id && person.name);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+      if (saved && typeof saved === 'object') {
+        const migrated = normalizePerson({ ...saved, id: saved.id || makeId() });
+        if (migrated.name) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([migrated]));
+          return [migrated];
+        }
       }
     }
   } catch {
-    setStatus('Saved profiles could not be read. You can still try the demo.');
+    setStatus('Saved notes could not be read. You can still explore the examples.');
   }
   return [];
 }
@@ -65,16 +82,17 @@ function loadProfiles() {
 function persistProfiles() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
-    setStatus('Profiles saved on this browser only.');
+    setStatus('Saved on this device only.');
     return true;
   } catch {
-    setStatus('Browser storage is unavailable. Your changes are only in this open page.');
+    setStatus('Device storage is unavailable. Your changes will last only while this page stays open.');
     return false;
   }
 }
 
 function setStatus(message) {
-  $('#demo-status').textContent = message;
+  const status = $('#demo-status');
+  if (status) status.textContent = message;
 }
 
 function selectedPerson() {
@@ -83,53 +101,79 @@ function selectedPerson() {
 
 function readFields() {
   return normalizePerson({
-    id: selectedPersonId || makeId(),
+    id: editingPersonId || makeId(),
     ...Object.fromEntries(Object.entries(personFields).map(([key, element]) => [key, element.value])),
   });
 }
 
 function fillFields(person) {
   for (const [key, element] of Object.entries(personFields)) {
-    element.value = person[key] || '';
+    element.value = person[key] || (key === 'relationship' ? 'connection' : '');
   }
 }
 
 function showForm(show, person = normalizePerson()) {
-  personForm.hidden = !show;
+  personFormCard.hidden = !show;
   $('#person-form-title').textContent = person.id ? 'Edit person' : 'Add a person';
   if (show) fillFields(person);
 }
 
 function renderPeople() {
   peopleList.replaceChildren();
+  const query = peopleSearch.value.trim().toLowerCase();
+  const filtered = profiles.filter((person) => [
+    person.name, person.relationship, person.metAt, person.background,
+    person.interest, person.lastTopic, person.note,
+  ].join(' ').toLowerCase().includes(query));
+
+  $('#people-count').textContent = `${profiles.length} saved`;
   if (!profiles.length) {
     const empty = document.createElement('p');
     empty.className = 'empty-people';
-    empty.textContent = 'No saved people yet. Add a profile or try the Sunny example.';
+    empty.textContent = 'No saved people yet. Add someone or try the fictional example.';
+    peopleList.append(empty);
+  } else if (!filtered.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-people';
+    empty.textContent = 'No matches. Try another name or topic.';
     peopleList.append(empty);
   } else {
-    for (const person of profiles) {
+    for (const person of filtered) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'person-choice';
       button.setAttribute('role', 'listitem');
       button.setAttribute('aria-pressed', String(person.id === selectedPersonId));
+      const avatar = document.createElement('span');
+      avatar.className = 'person-avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.textContent = person.name.trim().charAt(0).toUpperCase();
+      const copy = document.createElement('span');
+      copy.className = 'person-copy';
       const name = document.createElement('strong');
       name.textContent = person.name;
       const detail = document.createElement('small');
-      detail.textContent = person.metAt ? `Met at ${person.metAt}` : (person.background || 'Saved profile');
-      button.append(name, detail);
+      const relation = person.relationship === 'connection' ? 'New connection' : person.relationship[0].toUpperCase() + person.relationship.slice(1);
+      detail.textContent = [relation, person.metAt ? `‷ ${person.metAt}` : ''].filter(Boolean).join(' ');
+      copy.append(name, detail);
+      const arrow = document.createElement('span');
+      arrow.className = 'person-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '›';
+      button.append(avatar, copy, arrow);
       button.addEventListener('click', () => {
         selectedPersonId = person.id;
         cardIndex = 0;
         dismissed = false;
+        editingPersonId = null;
         showForm(false);
         render();
       });
       peopleList.append(button);
     }
   }
-  const hasSelection = Boolean(selectedPersonId && profiles.some((p) => p.id === selectedPersonId));
+
+  const hasSelection = Boolean(selectedPersonId && profiles.some((person) => person.id === selectedPersonId));
   $('#edit-person').disabled = !hasSelection;
   $('#delete-person').disabled = !hasSelection;
 }
@@ -137,56 +181,60 @@ function renderPeople() {
 function currentFrame() {
   return selectedFeature === 'conversation'
     ? conversationFrame(selectedPerson(), cardIndex)
-    : navigatorFrame($('#situation').value, cardIndex);
+    : navigatorFrame(activeSituation, cardIndex);
 }
 
 function currentCardCount() {
   return selectedFeature === 'conversation'
     ? conversationSuggestions(selectedPerson()).length
-    : NAVIGATOR_SITUATIONS[$('#situation').value].cues.length;
+    : NAVIGATOR_SITUATIONS[activeSituation].cues.length;
+}
+
+function renderSituationChoices() {
+  for (const button of document.querySelectorAll('[data-situation]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.situation === activeSituation));
+  }
+  $('#situation-description').textContent = NAVIGATOR_SITUATIONS[activeSituation].description;
 }
 
 function render() {
   renderPeople();
+  renderSituationChoices();
 
-  const size = $('#display-size').value;
-  const placement = $('#display-place').value;
-  const font = $('#display-font').value;
   const hud = $('#social-hud');
-  hud.dataset.size = size;
-  hud.dataset.placement = placement;
-  hud.dataset.font = font;
+  hud.dataset.size = $('#display-size').value;
+  hud.dataset.placement = $('#display-place').value;
+  hud.dataset.font = $('#display-font').value;
 
   const frame = currentFrame();
-  const message = createDisplayMessage({
-    ...frame,
-    visible: !dismissed,
-  });
-  // The future glasses adapter can subscribe to this event; no SDK is called here.
+  const message = createDisplayMessage({ ...frame, visible: !dismissed });
+  // The verified hardware adapter can subscribe to this event; no SDK is called here.
   publishDisplayMessage(message);
 
-  $('#cue-title').textContent = dismissed ? 'CARD DISMISSED' : message.title;
-  $('#cue-subtitle').textContent = dismissed ? 'Choose Next card to continue' : message.body;
-  $('#cue-footer').textContent = selectedFeature === 'conversation'
-    ? 'YOUR SAVED MEMORY'
-    : 'YOUR SELECTED SITUATION';
-  $('#progress-label').textContent = dismissed
-    ? 'Dismissed · press Next card to continue'
-    : `Card ${frame.cardIndex + 1} of ${frame.cardCount}`;
+  const kicker = selectedFeature === 'conversation'
+    ? (selectedPersonId ? 'YOUR SAVED MEMORY' : 'A GENTLE START')
+    : NAVIGATOR_SITUATIONS[activeSituation].label.toUpperCase();
+  $('#cue-kicker').textContent = kicker;
+  $('#cue-title').textContent = dismissed ? 'CUE HIDDEN' : message.title;
+  $('#cue-subtitle').textContent = dismissed ? 'Choose Next cue when you are ready.' : message.body;
+  $('#cue-footer').textContent = selectedFeature === 'conversation' ? 'YOUR SAVED MEMORY' : 'YOUR SELECTED MOMENT';
+  $('#progress-label').textContent = dismissed ? 'HIDDEN' : `${frame.cardIndex + 1} / ${frame.cardCount}`;
   $('#display-packet-json').textContent = JSON.stringify(message, null, 2);
+  $('#demo-status').textContent = 'Phone = context. Glasses = one concise cue. This browser preview is not connected to the glasses.';
 }
 
-function chooseFeature(feature) {
+function chooseFeature(feature, updateHash = false) {
   selectedFeature = feature;
   cardIndex = 0;
   dismissed = false;
   const isConversation = feature === 'conversation';
   conversationPanel.hidden = !isConversation;
   navigatorPanel.hidden = isConversation;
-  conversationTab.setAttribute('aria-selected', String(isConversation));
+  conversationTab.setAttribute('aria-selected', String(!isConversation));
   navigatorTab.setAttribute('aria-selected', String(!isConversation));
   conversationTab.tabIndex = isConversation ? 0 : -1;
   navigatorTab.tabIndex = isConversation ? -1 : 0;
+  if (updateHash) history.replaceState(null, '', isConversation ? '#conversation' : '#navigator');
   render();
 }
 
@@ -203,6 +251,7 @@ function saveCurrentProfile(event) {
   else profiles.push(person);
   selectedPersonId = person.id;
   editingPersonId = null;
+  peopleSearch.value = '';
   showForm(false);
   cardIndex = 0;
   dismissed = false;
@@ -210,14 +259,8 @@ function saveCurrentProfile(event) {
   render();
 }
 
-conversationTab.addEventListener('click', () => {
-  location.hash = 'conversation';
-  chooseFeature('conversation');
-});
-navigatorTab.addEventListener('click', () => {
-  location.hash = 'navigator';
-  chooseFeature('navigator');
-});
+conversationTab.addEventListener('click', () => chooseFeature('conversation', true));
+navigatorTab.addEventListener('click', () => chooseFeature('navigator', true));
 
 for (const tab of [conversationTab, navigatorTab]) {
   tab.addEventListener('keydown', (event) => {
@@ -231,26 +274,24 @@ for (const tab of [conversationTab, navigatorTab]) {
 }
 
 $('#add-person').addEventListener('click', () => {
-  editingPersonId = selectedPersonId;
-  selectedPersonId = null;
-  cardIndex = 0;
-  dismissed = false;
+  editingPersonId = null;
   showForm(true, normalizePerson());
-  render();
   personFields.name.focus();
 });
 
 $('#edit-person').addEventListener('click', () => {
   const person = selectedPerson();
   if (!person.id) return;
-  editingPersonId = selectedPersonId;
+  editingPersonId = person.id;
   showForm(true, person);
   personFields.name.focus();
 });
 
 $('#delete-person').addEventListener('click', () => {
-  if (!selectedPersonId) return;
-  profiles = profiles.filter((person) => person.id !== selectedPersonId);
+  const person = selectedPerson();
+  if (!person.id) return;
+  if (!window.confirm(`Delete the saved notes for ${person.name}?`)) return;
+  profiles = profiles.filter((item) => item.id !== selectedPersonId);
   selectedPersonId = profiles[0]?.id ?? null;
   editingPersonId = null;
   cardIndex = 0;
@@ -262,40 +303,45 @@ $('#delete-person').addEventListener('click', () => {
 
 $('#cancel-edit').addEventListener('click', () => {
   showForm(false);
-  selectedPersonId = editingPersonId ?? (profiles[0]?.id ?? null);
   editingPersonId = null;
   render();
 });
 
 personForm.addEventListener('submit', saveCurrentProfile);
+peopleSearch.addEventListener('input', renderPeople);
+
+document.querySelectorAll('[data-situation]').forEach((button) => {
+  button.addEventListener('click', () => {
+    activeSituation = button.dataset.situation;
+    cardIndex = 0;
+    dismissed = false;
+    render();
+  });
+});
 
 $('#example-person').addEventListener('click', () => {
   const sample = normalizePerson({
     id: 'sample-sunny',
     name: 'Sunny',
+    relationship: 'connection',
     metAt: 'Worn Hacks',
     background: 'Computer science graduate student',
     interest: 'AI, smart glasses and building things',
-    lastTopic: 'his hackathon project',
-    note: 'Ask how the project and demo went',
+    lastTopic: 'His hackathon project',
+    note: 'Ask how the project and demo went.',
   });
   const existingIndex = profiles.findIndex((person) => person.id === sample.id);
   if (existingIndex >= 0) profiles[existingIndex] = sample;
   else profiles.push(sample);
   selectedPersonId = sample.id;
   editingPersonId = null;
+  peopleSearch.value = '';
   showForm(false);
   cardIndex = 0;
   dismissed = false;
   persistProfiles();
   render();
-  setStatus('Fictional Sunny profile loaded. This is sample data, not a real identification.');
-});
-
-$('#situation').addEventListener('change', () => {
-  cardIndex = 0;
-  dismissed = false;
-  render();
+  setStatus('Fictional Sunny example loaded. This is sample data, not a real identification.');
 });
 
 $('#display-size').addEventListener('change', render);
@@ -317,13 +363,12 @@ $('#dismiss-cue').addEventListener('click', () => {
   render();
 });
 
-// A verified hardware adapter can turn physical controls into these app actions.
+// A verified glasses input adapter can publish these logical actions.
 onDisplayAction((action) => {
   if (action === 'next') $('#next-cue').click();
   if (action === 'previous') $('#prev-cue').click();
   if (action === 'dismiss') $('#dismiss-cue').click();
 });
-
 
 window.addEventListener('hashchange', () => {
   if (location.hash === '#navigator') chooseFeature('navigator');
