@@ -15,6 +15,8 @@ class CameraPresence(private val onUpdate: (String) -> Unit) {
     private var texture: SurfaceTexture? = null
     var active = false
         private set
+    var facePresent = false
+        private set
     private var lastCount = -1
 
     fun start(): String {
@@ -30,6 +32,7 @@ class CameraPresence(private val onUpdate: (String) -> Unit) {
                 texture = SurfaceTexture(15)
                 device.setPreviewTexture(texture)
                 device.setFaceDetectionListener { faces, _ ->
+                    facePresent = faces.isNotEmpty()
                     if (faces.size != lastCount) {
                         lastCount = faces.size
                         onUpdate(if (faces.isEmpty()) "No face detected" else
@@ -52,6 +55,7 @@ class CameraPresence(private val onUpdate: (String) -> Unit) {
         val device = camera
         camera = null
         active = false
+        facePresent = false
         try { device?.stopFaceDetection() } catch (_: Exception) {}
         try { device?.stopPreview() } catch (_: Exception) {}
         try { device?.release() } catch (_: Exception) {}

@@ -92,7 +92,14 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER -> {
                 val mode = modes[selectedMode]
                 if (mode == "camera") {
-                    if (camera.active) {
+                    if (camera.active && camera.facePresent) {
+                        // Wearer confirms the FICTIONAL example; no automated recognition.
+                        camera.stop()
+                        cameraStatus = "Fictional Sunny selected manually"
+                        selectedMode = modes.indexOf("sunny")
+                        CueRuntime.choosePreset("sunny")
+                        CueRuntime.manualMove(0)
+                    } else if (camera.active) {
                         camera.stop()
                         cameraStatus = "Camera test stopped"
                     } else if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -129,7 +136,9 @@ class MainActivity : Activity() {
         if (modes[selectedMode] == "camera") {
             modeView.text = "OPT-IN CAMERA CHECK · EXPERIMENT"
             titleView.text = if (camera.active) "FACE PRESENCE" else "CAMERA TEST"
-            detailsView.text = cameraStatus + "\n\nThis CANNOT identify Sunny or anyone."
+            detailsView.text = cameraStatus + "\\n\\n" +
+                if (camera.facePresent) "IDENTITY UNKNOWN. Tap ONLY if you confirm the person is fictional Sunny."
+                else "A face is not an identity. No identity recognition is active."
             statusView.text = "No photos or face profiles saved"
         } else {
             modeView.text = CueRuntime.label
