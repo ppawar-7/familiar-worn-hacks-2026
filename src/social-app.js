@@ -6,6 +6,7 @@ import {
   navigatorFrame,
 } from './core/social-cues.js';
 import { createDisplayMessage } from './hardware/display-contract.js';
+import { createCueTimeline, secondsUntilNextCue } from './core/cue-timing.js';
 import { publishDisplayMessage, onDisplayAction } from './hardware/display-events.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -36,6 +37,7 @@ let activeSituation = 'meet';
 let cardIndex = 0;
 let dismissed = false;
 let editingPersonId = null;
+let cueSession = null;
 
 function makeId() {
   if (globalThis.crypto && globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID();
@@ -161,6 +163,7 @@ function renderPeople() {
       arrow.textContent = '›';
       button.append(avatar, copy, arrow);
       button.addEventListener('click', () => {
+        stopCueSession();
         selectedPersonId = person.id;
         cardIndex = 0;
         dismissed = false;
@@ -188,6 +191,77 @@ function currentCardCount() {
   return selectedFeature === 'conversation'
     ? conversationSuggestions(selectedPerson()).length
     : NAVIGATOR_SITUATIONS[activeSituation].cues.length;
+}
+
+/**
+ * Browser-only demonstration: a selected card shows briefly at each interval
+ * and is then cleared. Lock-screen/background timing is deliberately not
+ * claimed; a real wearable needs verified native SDK/background support.
+ */
+function stopCueSession(status = 'Off · manual Next / Back controls still work.') {
+  if (cueSession) {
+    cueSession.timeouts.forEach(clearTimeout);
+    clearInterval(cueSession.countdown);
+    cueSession = null;
+  }
+  $('#auto-toggle').textContent = 'Start automatic preview';
+  $('#auto-toggle').setAttribute('aria-pressed', 'false');
+  $('#auto-interval').disabled = false;
+  $('#auto-status').textContent = status;
+}
+
+function startCueSession() {
+  if (document.hidden) {
+    $('#auto-status').textContent = 'Open this page to try automatic preview. It cannot run reliably with a locked phone.';
+    return;
+  }
+  stopCueSession();
+  const intervalSeconds = Number($('#auto-interval').value);
+  const timeline = createCueTimeline(currentCardCount(), intervalSeconds);
+  const session = {
+    timeline,
+    startedAt: performance.now(),
+    timeouts: [],
+    countdown: null,
+  };
+  cueSession = session;
+  cardIndex = 0;
+  dismissed = true;
+  render();
+  $('#auto-toggle').textContent = 'Stop preview';
+  $('#auto-toggle').setAttribute('aria-pressed', 'true');
+  $('#auto-interval').disabled = true;
+  $('#auto-status').textContent = 'First cue in ' + intervalSeconds + 's · no taps needed.';
+
+  for (const entry of timeline) {
+    session.timeouts.push(setTimeout(() => {
+      if (cueSession !== session) return;
+      cardIndex = entry.cardIndex;
+      dismissed = false;
+      render();
+      $('#auto-status').textContent = 'Cue ' + (entry.cardIndex + 1) + ' / ' + timeline.length + ' · visible for 7 seconds.';
+    }, entry.showAtMs));
+
+    session.timeouts.push(setTimeout(() => {
+      if (cueSession !== session) return;
+      dismissed = true;
+      render();
+      if (entry.cardIndex === timeline.length - 1) {
+        stopCueSession('All cues shown · session finished. Restart when you want another round.');
+      } else {
+        const remaining = secondsUntilNextCue(timeline, performance.now() - session.startedAt);
+        $('#auto-status').textContent = 'Display cleared · next cue in ' + remaining + 's.';
+      }
+    }, entry.hideAtMs));
+  }
+
+  session.countdown = setInterval(() => {
+    if (cueSession !== session || !dismissed) return;
+    const remaining = secondsUntilNextCue(timeline, performance.now() - session.startedAt);
+    if (remaining !== null) {
+      $('#auto-status').textContent = 'Display clear · next cue in ' + remaining + 's.';
+    }
+  }, 1000);
 }
 
 function renderSituationChoices() {
@@ -223,6 +297,7 @@ function render() {
 }
 
 function chooseFeature(feature, updateHash = false) {
+  stopCueSession();
   selectedFeature = feature;
   cardIndex = 0;
   dismissed = false;
@@ -239,6 +314,7 @@ function chooseFeature(feature, updateHash = false) {
 
 function saveCurrentProfile(event) {
   event.preventDefault();
+  stopCueSession();
   const person = readFields();
   if (!person.name) {
     personFields.name.focus();
@@ -273,12 +349,14 @@ navigatorTab.addEventListener('click', () => chooseFeature('navigator', true));
 });
 
 $('#add-person').addEventListener('click', () => {
+  stopCueSession();
   editingPersonId = null;
   showForm(true, normalizePerson());
   personFields.name.focus();
 });
 
 $('#edit-person').addEventListener('click', () => {
+  stopCueSession();
   const person = selectedPerson();
   if (!person.id) return;
   editingPersonId = person.id;
@@ -287,6 +365,7 @@ $('#edit-person').addEventListener('click', () => {
 });
 
 $('#delete-person').addEventListener('click', () => {
+  stopCueSession();
   const person = selectedPerson();
   if (!person.id || !window.confirm('Delete the saved notes for ' + person.name + '?')) return;
   profiles = profiles.filter((item) => item.id !== selectedPersonId);
@@ -310,6 +389,7 @@ peopleSearch.addEventListener('input', renderPeople);
 
 document.querySelectorAll('[data-situation]').forEach((button) => {
   button.addEventListener('click', () => {
+    stopCueSession();
     activeSituation = button.dataset.situation;
     cardIndex = 0;
     dismissed = false;
@@ -318,6 +398,7 @@ document.querySelectorAll('[data-situation]').forEach((button) => {
 });
 
 $('#example-person').addEventListener('click', () => {
+  stopCueSession();
   const sample = normalizePerson({
     id: 'sample-sunny',
     name: 'Sunny',
@@ -347,18 +428,41 @@ $('#example-person').addEventListener('click', () => {
 });
 
 $('#next-cue').addEventListener('click', () => {
+  stopCueSession();
   cardIndex = (cardIndex + 1) % currentCardCount();
   dismissed = false;
   render();
 });
 $('#prev-cue').addEventListener('click', () => {
+  stopCueSession();
   cardIndex = (cardIndex - 1 + currentCardCount()) % currentCardCount();
   dismissed = false;
   render();
 });
 $('#dismiss-cue').addEventListener('click', () => {
+  stopCueSession();
   dismissed = true;
   render();
+});
+
+$('#auto-toggle').addEventListener('click', () => {
+  if (cueSession) {
+    stopCueSession('Stopped · manual Next / Back controls are available.');
+    dismissed = true;
+    render();
+  } else {
+    startCueSession();
+  }
+});
+
+// A suspended mobile browser cannot be trusted to fire the scheduled cues.
+// Stop and clear the preview when the tab is backgrounded.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && cueSession) {
+    stopCueSession('Paused when the page was hidden. Reopen and start again.');
+    dismissed = true;
+    render();
+  }
 });
 
 // A verified glasses input adapter can publish these logical actions.
