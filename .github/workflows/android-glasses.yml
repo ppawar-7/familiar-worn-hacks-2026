@@ -23,13 +23,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      # GitHub's Ubuntu runner already has Android command-line tools installed.
-      # android-actions/setup-android@v3 invokes a removed legacy "tools" package
-      # on the Nov 2026 runners, so call sdkmanager directly instead.
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
       - name: Install Android API 34
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
       - name: Set up Gradle 9.8.2
         uses: gradle/actions/setup-gradle@v4
         with:
