@@ -25,11 +25,18 @@ In Conversation Starter or Social Navigator:
 
 This solves manual card switching *in the browser demo while the tab remains open and visible*. It **does not** yet solve real locked-phone hands-free delivery. Mobile browsers can suspend timers when backgrounded or the phone is locked. Real glasses delivery still requires verified official device APIs and a supported background/native runtime.
 
-## Phone and glasses responsibilities
+## Native M6 glasses app — source added, on-device test still required
 
-- **Phone:** chooses the person/situation, manages the saved context and optional timing.
-- **Wearable (planned):** one short cue at a time with next / previous / dismiss support if the actual hardware permits it.
-- **Today:** a green text preview and device-neutral show / clear messages, not a tested phone-to-glasses connection. No camera, face recognition, listening, emotion detection, or cloud account integration.
+**[Open the Android glasses code and installation checklist](glasses-android/README.md)**
+
+The team-supplied M6 Android 9 starter template is now adapted into a separate native FAMILIAR app at `glasses-android/`. It includes a green-on-black display, Sunny demo memories, social navigator presets, an **on-glasses automatic timer**, touchpad handlers, and a separate Wi-Fi phone remote hosted on the device. GitHub Actions is configured to build a test APK.
+
+- **Phone (hosted demo):** stores browser-local profiles and previews short cards. Not yet synced to the native app.
+- **Phone (M6 local remote):** after installing the glasses APK, open `http://<glasses-ip>:8080` while both devices are on a **private hotspot**. A code displayed on the glasses authorizes demo controls. HTTP is **not encrypted**; use fictional/test details only.
+- **Glasses (new native code):** schedules timed cards without asking the phone browser to stay open. Real background persistence and display behavior still require testing on the glasses.
+- **Camera experiment:** opt-in Android Camera1 **face-presence** detection, followed by wearer confirmation of fictional Sunny. **It cannot recognize identities automatically.** The camera API may be unavailable on the real firmware.
+
+**No real M6 installation, touchpad, camera, or background timing has been verified yet.**
 
 Browser profiles are manually entered and stored only on that device. **The source repository is public; never add real private profiles or photographs to the repo.** Save only details you have permission to keep.
 
