@@ -40,7 +40,7 @@ The social features send a small message using **FAMILIAR Display Contract v1**:
 - `cardIndex` and `cardCount`: current position
 - `actions`: logical `previous`, `next`, and `dismiss` actions
 
-The app publishes each message through the `familiar:display-message` event in `src/hardware/display-events.js`. A future device adapter can subscribe with `onDisplayMessage(handler)` and translate the message using the **actual documented glasses SDK**.
+The app publishes each message through `familiar:display-message`. A future adapter can subscribe with `onDisplayMessage(handler)`. The reverse direction is also prepared: a verified glasses input adapter can publish `previous`, `next`, or `dismiss` using `publishDisplayAction(action)`, and the app will respond. Both events are local to the same JavaScript runtime; they do not provide a phone-to-glasses network connection by themselves. The adapter still needs the **actual documented glasses SDK** and any required transport.
 
 This event and message format are our own handoff contract, not a device SDK. The teammate must verify the exact display API and test a message on the physical glasses before claiming integration. Display size, font, coordinates, buttons, camera, and face recognition are not assumed.
 

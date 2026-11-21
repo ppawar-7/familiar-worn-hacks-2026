@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { createDisplayMessage } from '../src/hardware/display-contract.js';
 import {
   FAMILIAR_DISPLAY_EVENT,
+  FAMILIAR_DISPLAY_ACTION_EVENT,
   publishDisplayMessage,
   onDisplayMessage,
+  publishDisplayAction,
+  onDisplayAction,
 } from '../src/hardware/display-events.js';
 
 test('social display message can be published for a future hardware adapter', () => {
@@ -25,4 +28,22 @@ test('social display message can be published for a future hardware adapter', ()
 test('invalid messages are not published', () => {
   const target = new EventTarget();
   assert.throws(() => publishDisplayMessage({ title: 'guess' }, target), /invalid/i);
+});
+
+
+test('future glasses buttons can send next, previous, and dismiss actions to the app', () => {
+  const target = new EventTarget();
+  const received = [];
+  const unsubscribe = onDisplayAction((action) => received.push(action), target);
+  for (const action of ['previous', 'next', 'dismiss']) {
+    assert.equal(publishDisplayAction(action, target), true);
+  }
+  assert.deepEqual(received, ['previous', 'next', 'dismiss']);
+  unsubscribe();
+  target.dispatchEvent(new Event(FAMILIAR_DISPLAY_ACTION_EVENT));
+  assert.deepEqual(received, ['previous', 'next', 'dismiss']);
+});
+
+test('unknown hardware actions are rejected', () => {
+  assert.throws(() => publishDisplayAction('guess', new EventTarget()), /Unsupported/);
 });

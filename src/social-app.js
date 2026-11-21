@@ -6,7 +6,7 @@ import {
   navigatorFrame,
 } from './core/social-cues.js';
 import { createDisplayMessage } from './hardware/display-contract.js';
-import { publishDisplayMessage } from './hardware/display-events.js';
+import { publishDisplayMessage, onDisplayAction } from './hardware/display-events.js';
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE_KEY = 'familiar:people:v2';
@@ -316,6 +316,14 @@ $('#dismiss-cue').addEventListener('click', () => {
   dismissed = true;
   render();
 });
+
+// A verified hardware adapter can turn physical controls into these app actions.
+onDisplayAction((action) => {
+  if (action === 'next') $('#next-cue').click();
+  if (action === 'previous') $('#prev-cue').click();
+  if (action === 'dismiss') $('#dismiss-cue').click();
+});
+
 
 window.addEventListener('hashchange', () => {
   if (location.hash === '#navigator') chooseFeature('navigator');
