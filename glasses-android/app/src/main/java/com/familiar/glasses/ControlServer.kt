@@ -68,13 +68,18 @@ class ControlServer(private val context: Context, private val port: Int) : Threa
             val method = parts[0]
             val path = parts[1].substringBefore('?')
             val headers = mutableMapOf<String, String>()
-            repeat(40) {
+            var endedHeaders = false
+            for (i in 0 until 40) {
                 val header = readLine(input) ?: throw IllegalArgumentException("Bad request")
-                if (header.isEmpty()) return@repeat
+                if (header.isEmpty()) {
+                    endedHeaders = true
+                    break
+                }
                 val colon = header.indexOf(':')
                 if (colon > 0) headers[header.substring(0,colon).trim().lowercase()] =
                     header.substring(colon+1).trim()
             }
+            if (!endedHeaders) throw IllegalArgumentException("Too many headers")
             val length = headers["content-length"]?.toIntOrNull() ?: 0
             if (length !in 0..8192) {
                 write(client, Reply(413, "{\"ok\":false,\"error\":\"request too large\"}"))
