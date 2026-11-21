@@ -10,8 +10,7 @@ import { publishDisplayMessage, onDisplayAction } from './hardware/display-event
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE_KEY = 'familiar:people:v3';
-const PREVIOUS_STORAGE_KEYS = ['familiar:people:v2', 'familiar:manual-person:v1'];
-
+const LEGACY_KEYS = ['familiar:people:v2', 'familiar:manual-person:v1'];
 const conversationTab = $('#conversation-tab');
 const navigatorTab = $('#navigator-tab');
 const conversationPanel = $('#conversation-panel');
@@ -31,7 +30,7 @@ const personFields = {
 };
 
 let profiles = loadProfiles();
-let selectedPersonId = profiles[0]?.id ?? null;
+let selectedPersonId = profiles[0] ? profiles[0].id : null;
 let selectedFeature = 'conversation';
 let activeSituation = 'meet';
 let cardIndex = 0;
@@ -39,8 +38,8 @@ let dismissed = false;
 let editingPersonId = null;
 
 function makeId() {
-  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
-  return `person-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+  if (globalThis.crypto && globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID();
+  return 'person-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
 }
 
 function safeReadStorage(key) {
@@ -56,12 +55,12 @@ function loadProfiles() {
   try {
     const current = safeReadStorage(STORAGE_KEY);
     if (Array.isArray(current)) {
-      return current.map((person) => normalizePerson(person)).filter((person) => person.id && person.name);
+      return current.map(normalizePerson).filter((person) => person.id && person.name);
     }
-    for (const key of PREVIOUS_STORAGE_KEYS) {
+    for (const key of LEGACY_KEYS) {
       const saved = safeReadStorage(key);
       if (Array.isArray(saved)) {
-        const migrated = saved.map((person) => normalizePerson(person)).filter((person) => person.id && person.name);
+        const migrated = saved.map(normalizePerson).filter((person) => person.id && person.name);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
         return migrated;
       }
@@ -96,19 +95,18 @@ function setStatus(message) {
 }
 
 function selectedPerson() {
-  return profiles.find((person) => person.id === selectedPersonId) ?? normalizePerson();
+  return profiles.find((person) => person.id === selectedPersonId) || normalizePerson();
 }
 
 function readFields() {
-  return normalizePerson({
-    id: editingPersonId || makeId(),
-    ...Object.fromEntries(Object.entries(personFields).map(([key, element]) => [key, element.value])),
-  });
+  const values = {};
+  for (const key of Object.keys(personFields)) values[key] = personFields[key].value;
+  return normalizePerson({ id: editingPersonId || makeId(), ...values });
 }
 
 function fillFields(person) {
-  for (const [key, element] of Object.entries(personFields)) {
-    element.value = person[key] || (key === 'relationship' ? 'connection' : '');
+  for (const key of Object.keys(personFields)) {
+    personFields[key].value = person[key] || (key === 'relationship' ? 'connection' : '');
   }
 }
 
@@ -126,16 +124,11 @@ function renderPeople() {
     person.interest, person.lastTopic, person.note,
   ].join(' ').toLowerCase().includes(query));
 
-  $('#people-count').textContent = `${profiles.length} saved`;
-  if (!profiles.length) {
+  $('#people-count').textContent = profiles.length + ' saved';
+  if (!profiles.length || !filtered.length) {
     const empty = document.createElement('p');
     empty.className = 'empty-people';
-    empty.textContent = 'No saved people yet. Add someone or try the fictional example.';
-    peopleList.append(empty);
-  } else if (!filtered.length) {
-    const empty = document.createElement('p');
-    empty.className = 'empty-people';
-    empty.textContent = 'No matches. Try another name or topic.';
+    empty.textContent = profiles.length ? 'No matches. Try another name or topic.' : 'No saved people yet. Add someone or try the fictional example.';
     peopleList.append(empty);
   } else {
     for (const person of filtered) {
@@ -144,18 +137,23 @@ function renderPeople() {
       button.className = 'person-choice';
       button.setAttribute('role', 'listitem');
       button.setAttribute('aria-pressed', String(person.id === selectedPersonId));
+
       const avatar = document.createElement('span');
       avatar.className = 'person-avatar';
       avatar.setAttribute('aria-hidden', 'true');
-      avatar.textContent = person.name.trim().charAt(0).toUpperCase();
+      avatar.textContent = person.name.charAt(0).toUpperCase();
+
       const copy = document.createElement('span');
       copy.className = 'person-copy';
       const name = document.createElement('strong');
       name.textContent = person.name;
       const detail = document.createElement('small');
-      const relation = person.relationship === 'connection' ? 'New connection' : person.relationship[0].toUpperCase() + person.relationship.slice(1);
-      detail.textContent = [relation, person.metAt ? `‷ ${person.metAt}` : ''].filter(Boolean).join(' ');
+      const relationship = person.relationship === 'connection'
+        ? 'New connection'
+        : person.relationship.charAt(0).toUpperCase() + person.relationship.slice(1);
+      detail.textContent = [relationship, person.metAt ? '· ' + person.metAt : ''].filter(Boolean).join(' ');
       copy.append(name, detail);
+
       const arrow = document.createElement('span');
       arrow.className = 'person-arrow';
       arrow.setAttribute('aria-hidden', 'true');
@@ -191,9 +189,9 @@ function currentCardCount() {
 }
 
 function renderSituationChoices() {
-  for (const button of document.querySelectorAll('[data-situation]')) {
+  document.querySelectorAll('[data-situation]').forEach((button) => {
     button.setAttribute('aria-pressed', String(button.dataset.situation === activeSituation));
-  }
+  });
   $('#situation-description').textContent = NAVIGATOR_SITUATIONS[activeSituation].description;
 }
 
@@ -208,7 +206,6 @@ function render() {
 
   const frame = currentFrame();
   const message = createDisplayMessage({ ...frame, visible: !dismissed });
-  // The verified hardware adapter can subscribe to this event; no SDK is called here.
   publishDisplayMessage(message);
 
   const kicker = selectedFeature === 'conversation'
@@ -218,7 +215,7 @@ function render() {
   $('#cue-title').textContent = dismissed ? 'CUE HIDDEN' : message.title;
   $('#cue-subtitle').textContent = dismissed ? 'Choose Next cue when you are ready.' : message.body;
   $('#cue-footer').textContent = selectedFeature === 'conversation' ? 'YOUR SAVED MEMORY' : 'YOUR SELECTED MOMENT';
-  $('#progress-label').textContent = dismissed ? 'HIDDEN' : `${frame.cardIndex + 1} / ${frame.cardCount}`;
+  $('#progress-label').textContent = dismissed ? 'HIDDEN' : (frame.cardIndex + 1) + ' / ' + frame.cardCount;
   $('#display-packet-json').textContent = JSON.stringify(message, null, 2);
   $('#demo-status').textContent = 'Phone = context. Glasses = one concise cue. This browser preview is not connected to the glasses.';
 }
@@ -230,7 +227,7 @@ function chooseFeature(feature, updateHash = false) {
   const isConversation = feature === 'conversation';
   conversationPanel.hidden = !isConversation;
   navigatorPanel.hidden = isConversation;
-  conversationTab.setAttribute('aria-selected', String(!isConversation));
+  conversationTab.setAttribute('aria-selected', String(isConversation));
   navigatorTab.setAttribute('aria-selected', String(!isConversation));
   conversationTab.tabIndex = isConversation ? 0 : -1;
   navigatorTab.tabIndex = isConversation ? -1 : 0;
@@ -262,7 +259,7 @@ function saveCurrentProfile(event) {
 conversationTab.addEventListener('click', () => chooseFeature('conversation', true));
 navigatorTab.addEventListener('click', () => chooseFeature('navigator', true));
 
-for (const tab of [conversationTab, navigatorTab]) {
+[conversationTab, navigatorTab].forEach((tab) => {
   tab.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
@@ -271,7 +268,7 @@ for (const tab of [conversationTab, navigatorTab]) {
       other.click();
     }
   });
-}
+});
 
 $('#add-person').addEventListener('click', () => {
   editingPersonId = null;
@@ -289,10 +286,9 @@ $('#edit-person').addEventListener('click', () => {
 
 $('#delete-person').addEventListener('click', () => {
   const person = selectedPerson();
-  if (!person.id) return;
-  if (!window.confirm(`Delete the saved notes for ${person.name}?`)) return;
+  if (!person.id || !window.confirm('Delete the saved notes for ' + person.name + '?')) return;
   profiles = profiles.filter((item) => item.id !== selectedPersonId);
-  selectedPersonId = profiles[0]?.id ?? null;
+  selectedPersonId = profiles[0] ? profiles[0].id : null;
   editingPersonId = null;
   cardIndex = 0;
   dismissed = false;
@@ -344,9 +340,9 @@ $('#example-person').addEventListener('click', () => {
   setStatus('Fictional Sunny example loaded. This is sample data, not a real identification.');
 });
 
-$('#display-size').addEventListener('change', render);
-$('#display-place').addEventListener('change', render);
-$('#display-font').addEventListener('change', render);
+['#display-size', '#display-place', '#display-font'].forEach((selector) => {
+  $(selector).addEventListener('change', render);
+});
 
 $('#next-cue').addEventListener('click', () => {
   cardIndex = (cardIndex + 1) % currentCardCount();
