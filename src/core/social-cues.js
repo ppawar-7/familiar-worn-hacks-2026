@@ -69,7 +69,7 @@ export const NAVIGATOR_SITUATIONS = Object.freeze({
     shortLabel: 'Dating',
     description: 'Stay present, share naturally, and respect each person’s comfort and boundaries.',
     cues: freezeCues([
-      ['START WITH CURIOSITY7, 'What has been the highlight of your week?'],
+      ['START WITH CURIOSITY', 'What has been the highlight of your week?'],
       ['ASK, THEN SHARE', 'Follow their answer with a story of your own.'],
       ['NOTICE COMFORT', 'Give space; let the conversation breathe.'],
       ['BE PRESENT', 'You do not need a perfect line.'],
@@ -126,7 +126,7 @@ export function normalizePerson(person = {}) {
   return Object.freeze({
     id: cleanText(person.id, 80),
     name: cleanText(person.name, 40),
-    relationship: Object.hasOwn(RELATIONSHIP_LABELS, relationship) ? relationship : 'other',
+    relationship,
     metAt: cleanText(person.metAt, 90),
     background: cleanText(person.background, 100),
     interest: cleanText(person.interest ?? person.interests, 100),
@@ -142,7 +142,7 @@ export function conversationSuggestions(person = {}) {
 
   if (p.name) {
     const relationship = RELATIONSHIP_LABELS[p.relationship] || RELATIONSHIP_LABELS.other;
-    const context = [relationship, p.metAt ? `Met at ${p.metAt}` : ''].filter(Boolean).join(' · ');
+    const context = [relationship, p.metAt ? 'Met at ' + p.metAt : ''].filter(Boolean).join(' · ');
     cards.push({ title: p.name.toUpperCase(), subtitle: context || 'Someone you chose to remember' });
   }
   if (p.background) cards.push({ title: 'A LITTLE CONTEXT', subtitle: p.background });
