@@ -155,3 +155,29 @@ button:focus-visible,a:focus-visible { outline:2px solid #baffca; outline-offset
 }
 .people-list > [role=listitem] { min-width:0; }
 .sample-button { margin:0; }
+
+
+/* Optional timed-cue preview: setup once, then let the display cards advance. */
+.timed-cues {
+  margin-top:16px; padding:16px; border-radius:14px;
+  border:1px solid #4b7959; background:#0a1d11;
+}
+.timed-heading h3 { margin:7px 0 5px; color:#e9ffed; font-size:19px; letter-spacing:-.02em; }
+.timed-heading p { margin:0; color:#bad3c0; font-size:12px; line-height:1.5; }
+.timed-controls { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; align-items:end; margin-top:14px; }
+.timed-controls label { grid-column:1 / -1; color:#c4e9cd; font-size:11px; font-weight:750; }
+.timed-controls select {
+  min-width:0; width:100%; min-height:46px; border-radius:10px;
+  border:1px solid #4f7659; background:#08150d; color:#e7ffeb;
+  font:inherit; font-size:13px; padding:9px 12px;
+}
+.timed-controls button { min-height:46px; max-width:185px; }
+.timed-controls button[aria-pressed=true] { background:#3a1f20; border-color:#aa7676; color:#ffe4e4; }
+.auto-status { color:#a4f2b9; font-weight:700; font-size:12px; margin:12px 0 0; min-height:19px; }
+.auto-note { margin:8px 0 0; }
+@media (max-width:600px) {
+ .timed-cues { padding:13px; }
+ .timed-controls { grid-template-columns:1fr; }
+ .timed-controls label { grid-column:auto; }
+ .timed-controls button { max-width:none; width:100%; }
+}
