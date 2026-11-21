@@ -1,0 +1,13 @@
+# Local secrets and dependencies
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+# Team participant media / recordings stay local by default
+private-media/
+recordings/

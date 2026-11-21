@@ -1,0 +1,10 @@
+{
+  "name": "familiar-worn-hacks-2026",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Familiar team hackathon workspace — green-display wearable AI experiments",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
