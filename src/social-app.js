@@ -32,7 +32,7 @@ let selectedPersonId = profiles[0]?.id ?? null;
 let selectedFeature = 'conversation';
 let cardIndex = 0;
 let dismissed = false;
-let editing = false;
+let editingPersonId = null;
 
 function makeId() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -95,7 +95,6 @@ function fillFields(person) {
 }
 
 function showForm(show, person = normalizePerson()) {
-  editing = show;
   personForm.hidden = !show;
   $('#person-form-title').textContent = person.id ? 'Edit person' : 'Add a person';
   if (show) fillFields(person);
@@ -203,6 +202,7 @@ function saveCurrentProfile(event) {
   if (existingIndex >= 0) profiles[existingIndex] = person;
   else profiles.push(person);
   selectedPersonId = person.id;
+  editingPersonId = null;
   showForm(false);
   cardIndex = 0;
   dismissed = false;
@@ -231,6 +231,7 @@ for (const tab of [conversationTab, navigatorTab]) {
 }
 
 $('#add-person').addEventListener('click', () => {
+  editingPersonId = selectedPersonId;
   selectedPersonId = null;
   cardIndex = 0;
   dismissed = false;
@@ -242,6 +243,7 @@ $('#add-person').addEventListener('click', () => {
 $('#edit-person').addEventListener('click', () => {
   const person = selectedPerson();
   if (!person.id) return;
+  editingPersonId = selectedPersonId;
   showForm(true, person);
   personFields.name.focus();
 });
@@ -250,6 +252,7 @@ $('#delete-person').addEventListener('click', () => {
   if (!selectedPersonId) return;
   profiles = profiles.filter((person) => person.id !== selectedPersonId);
   selectedPersonId = profiles[0]?.id ?? null;
+  editingPersonId = null;
   cardIndex = 0;
   dismissed = false;
   showForm(false);
@@ -259,7 +262,8 @@ $('#delete-person').addEventListener('click', () => {
 
 $('#cancel-edit').addEventListener('click', () => {
   showForm(false);
-  selectedPersonId = profiles[0]?.id ?? null;
+  selectedPersonId = editingPersonId ?? (profiles[0]?.id ?? null);
+  editingPersonId = null;
   render();
 });
 
@@ -279,6 +283,7 @@ $('#example-person').addEventListener('click', () => {
   if (existingIndex >= 0) profiles[existingIndex] = sample;
   else profiles.push(sample);
   selectedPersonId = sample.id;
+  editingPersonId = null;
   showForm(false);
   cardIndex = 0;
   dismissed = false;
