@@ -45,7 +45,7 @@ Each situation has multiple short prompts, shown **one card at a time**. The bro
 
 **Code:** `social.html`, `src/social.css`.
 
-## Hardware handoff — implemented only as a software contract
+## Browser display handoff — implemented as a software contract
 
 - `src/hardware/display-contract.js` formats a validated packet: `feature`, `title`, `body`, `visible`, `cardIndex`, `cardCount`, and `actions`.
 - `src/hardware/display-events.js` publishes local messages to the browser and accepts `previous`, `next`, `dismiss` events.
@@ -61,8 +61,6 @@ Each situation has multiple short prompts, shown **one card at a time**. The bro
 - Vercel (team-login protected): https://familiar-familiar6.vercel.app/social.html
 - The repository is **public** by team choice. **Never commit real personal profiles or photographs.** Saved browser profiles do not get added to GitHub.
 
-## Main limitations and next milestone
-
 ## Automatic cue preview — implemented in browser, not yet on glasses
 
 - Select a person in Conversation Starter or a situation in Social Navigator.
@@ -75,6 +73,29 @@ Each situation has multiple short prompts, shown **one card at a time**. The bro
 
 **Code:** `src/core/cue-timing.js` (pure schedule), `src/social-app.js` (browser scheduling), `social.html` and `src/social.css` (controls), `tests/cue-timing.test.mjs` (schedule tests).
 
-## Next hardware milestone
+## Native M6 Android app — built and APK compiled, physical testing pending
 
-Actual wearable prompts while the phone is locked require **documented SDK support**, a verified phone-to-glasses connection, and a background-capable runtime (or on-device scheduler). A normal mobile web page is not a reliable locked-phone timer. No real-glasses feature is claimed until tested on the physical event hardware.
+The new `glasses-android/` directory contains actual native Android code adapted from the supplied M6 / Android 9 app template:
+
+- Green monochrome text layout for the template's 640×480 display.
+- Device-side cue timer; intervals of 10/30/60/120 seconds, seven-second card visibility.
+- Fictional Sunny cards and Social Navigator situations, including networking and dating, usable without keeping the phone browser open.
+- M6-template touchpad key handlers for swipe / tap / double-tap, **not yet verified on the physical glasses**.
+- Foreground service and optional accessibility boot helper; no device settings changed by the team-building tools.
+- Optional same-origin phone remote served by the glasses at `http://<glasses-ip>:8080`, protected by a random code displayed on the glasses. **HTTP is not encrypted: use fictional/test data on a trusted private hotspot only.** The hosted HTTPS Vercel app does not connect directly to this remote.
+- Optional opt-in Android camera face-presence experiment. A face callback indicates only that a face is in view, **not who it is**. Showing fictional Sunny's memory after detection requires **explicit wearer confirmation**. Automatic face identification is NOT implemented.
+- GitHub Actions workflow builds an APK; a successful run provides the downloadable `FAMILIAR-M6-debug-apk` artifact.
+
+**Code and team installation checklist:** [glasses-android/README.md](../glasses-android/README.md).
+
+**Android build verified in GitHub Actions:** [successful APK build](https://github.com/ppawar-7/familiar-worn-hacks-2026/actions/runs/44933633472).
+
+## Remaining physical-device milestones
+
+- Install the Android APK on the team's single M6 pair via the confirmed MLDemo/ADB method.
+- Verify text legibility, actual touchpad key codes, on-glasses timer continuity and app foreground behavior.
+- Verify Camera1 preview / face-presence callback support. **Do not imply person recognition** from generic face detection.
+- If automatic person identity is truly needed, implement a separate consent-based enrollment + reliable on-device matching pipeline with an unknown-person fallback and encrypted data storage, after verifying camera access and getting participants' consent.
+- Replace demo HTTP with a genuinely encrypted/authenticated transport before any real private profiles are transferred.
+
+**Current status: native code built and APK compiled; no on-device installation or hardware functionality has been independently verified.**
