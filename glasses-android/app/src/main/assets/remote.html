@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>FAMILIAR · M6 Remote</title>
+<style>
+:root { color-scheme:dark; font:16px system-ui,Arial,sans-serif; background:#07140c; color:#e7f7eb; }
+* {box-sizing:border-box} body{margin:0;padding:18px} main{max-width:560px;margin:auto}
+h1{margin:8px 0;color:#89f6a5;letter-spacing:.08em}h2{font-size:19px;margin:0 0 12px}
+.note{color:#b5d3bb;font-size:13px;line-height:1.5}
+.card{border:1px solid #3f6649;background:#102619;border-radius:16px;padding:17px;margin:16px 0}
+label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+input,select{width:100%;min-height:45px;border-radius:9px;background:#041008;color:#f3fff5;
+border:1px solid #55835e;padding:10px;font:inherit;font-size:16px}
+button{min-height:47px;border-radius:10px;border:0;background:#90ffad;color:#06130a;
+padding:11px 15px;margin:5px 5px 5px 0;font:700 15px system-ui;cursor:pointer}
+button.secondary{background:#26412d;color:#dcffe6}
+button:focus-visible,a:focus-visible{outline:3px solid #efffed;outline-offset:2px}
+#result{padding:11px;margin-top:9px;border:1px solid #3a6843;border-radius:9px;
+min-height:43px;color:#b8ffc9;white-space:pre-line}
+small{color:#acd1b6}
+</style>
+</head>
+<body>
+<main>
+<p class="note">FAMILIAR · M6 SMART GLASSES</p>
+<h1>Phone setup. Eyes up.</h1>
+<p class="note">This local remote talks directly to your glasses over Wi-Fi. The public Vercel web app is NOT connected here.</p>
+<div class="card">
+<h2>1 · Pair with your glasses</h2>
+<label for="key">12-character code shown on glasses</label>
+<input type="password" id="key" maxlength="12" autocomplete="off" spellcheck="false" placeholder="Read code from green display">
+<p class="note"><strong>DEMO SECURITY:</strong> HTTP is not encrypted. Only use on your private hotspot with fictional/test profiles. Never send anyone's real private details.</p>
+</div>
+<div class="card">
+<h2>2 · Pick a situation</h2>
+<label for="preset">What are you doing?</label>
+<select id="preset">
+<option value="sunny">Conversation Starter · Sunny (fictional)</option>
+<option value="networking">Networking event</option>
+<option value="dating">Dating / first date</option>
+<option value="meet">Meeting someone new</option>
+<option value="join">Joining a group</option>
+<option value="continue">Keep the conversation going</option>
+<option value="reconnect">Reconnect</option>
+<option value="interview">Job interview</option>
+<option value="exit">Leave politely</option>
+</select>
+<label for="seconds">Interval between prompts</label>
+<select id="seconds">
+<option value="10">10 seconds · quick demo</option><option value="30" selected>30 seconds</option>
+<option value="60">1 minute</option><option value="120">2 minutes</option>
+</select>
+<button id="start">Start on glasses</button>
+<button id="stop" class="secondary">Stop / clear</button>
+</div>
+<div class="card">
+<h2>3 · Try your own fictional memory</h2>
+<p class="note">These fields demonstrate the real flow without storing data on a server. No face recognition is used.</p>
+<label for="person">Name / nickname</label><input id="person" maxlength="40" placeholder="Sunny" value="Sunny">
+<label for="met">Where you met</label><input id="met" maxlength="70" value="Worn Hacks">
+<label for="context">Context</label><input id="context" maxlength="100" value="Computer science graduate student">
+<label for="interest">Interests</label><input id="interest" maxlength="100" value="AI and smart glasses">
+<label for="topic">What to talk about next</label><input id="topic" maxlength="110" value="Ask how their demo went">
+<button id="custom">Send sample memory cards</button>
+</div>
+<div class="card">
+<h2>Touchpad-free controls</h2>
+<button id="prev" class="secondary">← Previous</button>
+<button id="next" class="secondary">Next →</button>
+<button id="status" class="secondary">Check status</button>
+<div id="result" role="status" aria-live="polite">Enter the code from your glasses to begin.</div>
+</div>
+<p class="note">For live use, the glasses app and real M6 capabilities must be validated on the physical unit. The camera experiment detects face presence only; it does not know anyone's identity.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+async function call(path, body=null) {
+ const key=$('key').value.trim().toUpperCase();
+ if(!key){$('result').textContent='Enter the glasses code first.';return;}
+ try {
+  const response=await fetch(path,{method:body===null?'GET':'POST',headers:{
+   'X-Familiar-Key':key,'Content-Type':'application/json'
+  },body:body===null?undefined:JSON.stringify(body),cache:'no-store'});
+  const out=await response.json();
+  $('result').textContent=out.ok
+   ? ('Connected · '+(out.label||'Command sent')+(out.running===true?' · session running':''))
+   : ('Glasses returned: '+(out.error||response.status));
+ }catch(e){$('result').textContent='Connection failed. Check Wi-Fi/hotspot and glasses IP.';}
+}
+$('start').onclick=()=>call('/api/start',{id:$('preset').value,seconds:Number($('seconds').value)});
+$('stop').onclick=()=>call('/api/stop',{});
+$('next').onclick=()=>call('/api/next',{});
+$('prev').onclick=()=>call('/api/previous',{});
+$('status').onclick=()=>call('/api/status');
+$('custom').onclick=()=>{
+ const str=id=>$(id).value.trim();
+ const cards=[
+  {title:str('person').toUpperCase(),body:'Met at '+str('met')},
+  {title:'A LITTLE CONTEXT',body:str('context')},
+  {title:'INTERESTS',body:str('interest')},
+  {title:'NEXT TIME',body:str('topic')}
+ ].filter(card=>card.title&&card.body);
+ call('/api/session',{cards,seconds:Number($('seconds').value)});
+};
+</script></body></html>
