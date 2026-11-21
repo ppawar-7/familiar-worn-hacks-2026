@@ -2,130 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#09100e" />
-  <title>FAMILIAR · Conversation Starter + Social Navigator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08110d" />
+  <meta name="description" content="FAMILIAR helps you remember people and find a natural next step in conversations." />
+  <title>FAMILIAR · Your social co-pilot</title>
   <link rel="stylesheet" href="./src/styles.css" />
   <link rel="stylesheet" href="./src/social.css" />
   <script type="module" src="./src/social-app.js"></script>
 </head>
-<body>
-  <main class="shell">
+<body class="social-page">
+  <div class="app-shell">
     <header class="social-header">
-      <nav class="breadcrumb" aria-label="FAMILIAR features">
-        <a href="./index.html#proximity">01 · Proximity Alerts</a>
-        <a href="#conversation" id="social-link-conversation">02 · Conversation Starter</a>
-        <a href="#navigator" id="social-link-navigator">03 · Social Navigator</a>
+      <nav class="topbar" aria-label="FAMILIAR navigation">
+        <a class="brand" href="./index.html#proximity" aria-label="FAMILIAR home">
+          <span class="brand-mark">F</span><span>FAMILIAR</span>
+        </a>
+        <a class="back-link" href="./index.html#proximity">01 · Proximity alerts <span aria-hidden="true">↗</span></a>
       </nav>
-      <div class="eyebrow">TEAM FAMILIAR</div>
-      <h1>Remember people.<br><span>Find your words.</span></h1>
-      <p class="intro">Save what matters, then move through one short reminder at a time. Designed for a phone first and a glasses display later.</p>
+      <div class="hero-copy">
+        <div class="eyebrow">LOOKS FAMILIAR · FEELS FAMILIAR</div>
+        <h1>Be here now.<br /><span>Keep the thread.</span></h1>
+        <p>Remember the details that matter. Get one discreet cue when you need it — without staring at your phone.</p>
+      </div>
+      <aside class="privacy-strip" role="note">
+        <span class="privacy-mark" aria-hidden="true">◈</span>
+        <div><strong>Private by design</strong><span>Your notes stay on this device. No face recognition, background listening, or automatic recording.</span></div>
+      </aside>
     </header>
 
-    <aside class="simulation-banner" role="note">
-      <strong>PHONE / BROWSER PROTOTYPE</strong>
-      <span>Profiles are entered manually and stored on this browser. No face recognition, camera, microphone, cloud sync, or glasses connection is active.</span>
-    </aside>
+    <nav class="feature-tabs" role="tablist" aria-label="Choose a FAMILIAR feature">
+      <button type="button" id="conversation-tab" role="tab" aria-selected="true" aria-controls="conversation-panel">
+        <span class="tab-number">01</span><span class="tab-copy"><strong>Remember people</strong><small>Conversation Starter</small></span>
+      </button>
+      <button type="button" id="navigator-tab" role="tab" aria-selected="false" aria-controls="navigator-panel" tabindex="-1">
+        <span class="tab-number">02</span><span class="tab-copy"><strong>Find your next step</strong><small>Social Navigator</small></span>
+      </button>
+    </nav>
 
-    <div class="feature-tabs" role="tablist" aria-label="Choose a feature">
-      <button type="button" id="conversation-tab" role="tab" aria-selected="true" aria-controls="conversation-panel">02 · Conversation Starter</button>
-      <button type="button" id="navigator-tab" role="tab" aria-selected="false" aria-controls="navigator-panel" tabindex="-1">03 · Social Navigator</button>
-    </div>
-
-    <section class="social-layout">
+    <main class="social-layout">
       <section class="panel social-controls" id="conversation-panel" role="tabpanel" aria-labelledby="conversation-tab">
-        <div class="section-label">LOOKS FAMILIAR</div>
-        <h2>People I remember</h2>
-        <p class="note-block">Choose someone to see your saved reminders. Only add information you have permission to keep.</p>
-        <div id="people-list" class="people-list" role="list" aria-label="Saved people">
-          <p class="empty-people">No saved people yet. Add a profile or try the Sunny example.</p>
+        <div class="section-heading">
+          <div><div class="section-label">CONVERSATION STARTER</div><h2>People I remember</h2><p class="panel-intro">A few thoughtful notes can make reconnecting feel more natural.</p></div>
+          <span class="count-pill" id="people-count">0 saved</span>
         </div>
-        <div class="inline-actions profile-actions">
-          <button type="button" id="add-person" class="primary-action">+ Add person</button>
-          <button type="button" id="edit-person" class="secondary-action" disabled>Edit</button>
+
+        <div class="people-toolbar">
+          <label class="search-field" for="people-search"><span aria-hidden="true">⌕</span><input type="search" id="people-search" placeholder="Search people or topics" autocomplete="off" /></label>
+          <button type="button" id="add-person" class="primary-action add-button">+ Add person</button>
+        </div>
+
+        <div id="people-list" class="people-list" role="list" aria-label="Saved people">
+          <p class="empty-people">No saved people yet. Add someone or try the fictional example.</p>
+        </div>
+
+        <div class="profile-actions">
+          <button type="button" id="edit-person" class="secondary-action" disabled>Edit selected</button>
           <button type="button" id="delete-person" class="text-action" disabled>Delete</button>
         </div>
 
-        <form id="person-form" class="person-form" hidden>
-          <div class="form-heading">
-            <h3 id="person-form-title">New person</h3>
-            <span>PRIVATE · STORED ON THIS BROWSER</span>
-          </div>
-          <label for="person-name">Name or nickname</label>
-          <input type="text" id="person-name" maxlength="40" autocomplete="off" placeholder="e.g. Sunny" required />
-          <label for="person-met">Where did you meet?</label>
-          <input type="text" id="person-met" maxlength="90" autocomplete="off" placeholder="e.g. Worn Hacks" />
-          <label for="person-background">What do you know about them?</label>
-          <input type="text" id="person-background" maxlength="100" autocomplete="off" placeholder="e.g. Computer science graduate student" />
-          <label for="person-interest">Interests</label>
-          <input type="text" id="person-interest" maxlength="100" autocomplete="off" placeholder="e.g. AI, robotics, music" />
-          <label for="person-topic">Last conversation / shared topic</label>
-          <input type="text" id="person-topic" maxlength="100" autocomplete="off" placeholder="e.g. their hackathon project" />
-          <label for="person-note">A reminder for next time</label>
-          <textarea id="person-note" maxlength="160" rows="2" placeholder="e.g. Ask how their demo went"></textarea>
-          <div class="inline-actions">
-            <button type="submit" class="primary-action">Save profile</button>
-            <button type="button" id="cancel-edit" class="secondary-action">Cancel</button>
-          </div>
-        </form>
-
-        <div class="sample-row">
-          <button type="button" id="example-person" class="text-action">Load fictional Sunny example</button>
+        <div class="person-form-card" id="person-form-card" hidden>
+          <form id="person-form" class="person-form">
+            <div class="form-heading"><div><div class="section-label">YOUR PRIVATE NOTES</div><h3 id="person-form-title">Add a person</h3></div><span class="local-only">SAVED ON THIS DEVICE</span></div>
+            <label for="person-name">Name or nickname <span class="required-mark">*</span></label>
+            <input type="text" id="person-name" maxlength="40" autocomplete="off" placeholder="e.g. Sunny" required />
+            <label for="person-relationship">How do you know them?</label>
+            <select id="person-relationship">
+              <option value="connection">New connection</option><option value="friend">Friend</option><option value="colleague">Colleague</option><option value="mentor">Mentor</option><option value="date">Date</option><option value="other">Other</option>
+            </select>
+            <label for="person-met">Where did you meet?</label>
+            <input type="text" id="person-met" maxlength="90" autocomplete="off" placeholder="e.g. Worn Hacks" />
+            <label for="person-background">A little context</label>
+            <input type="text" id="person-background" maxlength="100" autocomplete="off" placeholder="e.g. Computer science graduate student" />
+            <label for="person-interest">Interests or things they care about</label>
+            <input type="text" id="person-interest" maxlength="100" autocomplete="off" placeholder="e.g. AI, robotics, music" />
+            <label for="person-topic">What did you last talk about?</label>
+            <input type="text" id="person-topic" maxlength="100" autocomplete="off" placeholder="e.g. their hackathon project" />
+            <label for="person-note">A reminder for next time</label>
+            <textarea id="person-note" maxlength="160" rows="2" placeholder="e.g. Ask how their demo went"></textarea>
+            <div class="form-actions"><button type="submit" class="primary-action">Save notes</button><button type="button" id="cancel-edit" class="secondary-action">Cancel</button></div>
+          </form>
         </div>
-        <p class="subtle">No photos or face templates are collected. Clearing a profile deletes it from this browser. There is no account or online backup.</p>
+
+        <div class="sample-row"><button type="button" id="example-person" class="sample-button">Try the fictional Sunny example <span aria-hidden="true">→</span></button></div>
+        <p class="subtle privacy-footnote">Only save details you have permission to remember. You can edit or delete a profile at any time.</p>
       </section>
 
-      <section class="panel social-controls" id="navigator-panel" role="tabpanel" aria-labelledby="navigator-tab" hidden>
-        <div class="section-label">FEELS FAMILIAR</div>
-        <h2>What moment are you in?</h2>
-        <p class="note-block">Choose a situation. FAMILIAR offers a few optional cues, one at a time. You decide what to use.</p>
-        <label for="situation">Social situation</label>
-        <select id="situation">
-          <option value="meet">Meeting someone new</option>
-          <option value="join">Joining a group</option>
-          <option value="continue">Keeping a conversation going</option>
-          <option value="reconnect">Reconnecting with someone</option>
-          <option value="exit">Leaving politely</option>
-        </select>
-        <div class="step-illustration" aria-hidden="true">
-          <span>01 · NOTICE</span><span>02 · RESPOND</span><span>03 · FOLLOW THROUGH</span>
+      <section class="panel social-controls navigator-panel" id="navigator-panel" role="tabpanel" aria-labelledby="navigator-tab" hidden>
+        <div class="section-heading">
+          <div><div class="section-label">SOCIAL NAVIGATOR</div><h2>What moment are you in?</h2><p class="panel-intro">Choose the situation. We’ll offer a few optional cues, one at a time.</p></div>
         </div>
-        <p class="note-block">These are suggestions, not scripts. Nothing listens to the conversation or judges how it is going.</p>
+
+        <div class="situation-grid" id="situation-grid" role="group" aria-label="Choose a social situation">
+          <button type="button" class="situation-choice" data-situation="meet" aria-pressed="true"><span class="situation-icon" aria-hidden="true">✦</span><strong>Meeting someone</strong><small>Start naturally</small></button>
+          <button type="button" class="situation-choice" data-situation="join" aria-pressed="false"><span class="situation-icon" aria-hidden="true">◎</span><strong>Joining a group</strong><small>Find an opening</small></button>
+          <button type="button" class="situation-choice" data-situation="networking" aria-pressed="false"><span class="situation-icon" aria-hidden="true">↗</span><strong>Networking event</strong><small>Make a connection</small></button>
+          <button type="button" class="situation-choice" data-situation="dating" aria-pressed="false"><span class="situation-icon" aria-hidden="true">♡</span><strong>Dating / first date</strong><small>Be present</small></button>
+          <button type="button" class="situation-choice" data-situation="interview" aria-pressed="false"><span class="situation-icon" aria-hidden="true">▤</span><strong>Job interview</strong><small>Stay clear and calm</small></button>
+          <button type="button" class="situation-choice" data-situation="continue" aria-pressed="false"><span class="situation-icon" aria-hidden="true">↔</span><strong>Keep it going</strong><small>Build on a detail</small></button>
+          <button type="button" class="situation-choice" data-situation="reconnect" aria-pressed="false"><span class="situation-icon" aria-hidden="true">⟲</span><strong>Reconnect</strong><small>Pick up a thread</small></button>
+          <button type="button" class="situation-choice" data-situation="exit" aria-pressed="false"><span class="situation-icon" aria-hidden="true">→</span><strong>Wrap up</strong><small>Leave kindly</small></button>
+        </div>
+        <p class="situation-description" id="situation-description">A relaxed way to open a conversation and find common ground.</p>
+        <p class="subtle">These are gentle suggestions, not scripts. Nothing listens to the conversation or judges how it is going.</p>
       </section>
 
-      <section class="panel social-preview" aria-label="One-card glasses display preview">
-        <div class="section-label">ONE CARD AT A TIME</div>
-        <h2>Glasses message preview</h2>
-        <p class="connection" role="status">● PREVIEW ONLY · GLASSES NOT CONNECTED</p>
+      <section class="panel social-preview" aria-label="Glasses message preview">
+        <div class="section-heading preview-heading">
+          <div><div class="section-label">SEAMLESS HANDOFF</div><h2>Your next cue</h2><p class="panel-intro">Phone for context. Glasses for one quick glance.</p></div>
+          <span class="glasses-status"><span aria-hidden="true">●</span> PREVIEW ONLY</span>
+        </div>
+
         <div class="social-hud" id="social-hud" data-size="medium" data-placement="center" data-font="mono" aria-live="polite" aria-atomic="true">
           <div class="hud-identity"><span>FAMILIAR</span><span>● DEMO</span></div>
           <div class="social-hud-cue">
-            <div class="social-hud-title" id="cue-title">START WITH CURIOSITY</div>
-            <div class="social-hud-subtitle" id="cue-subtitle">What has been exciting lately?</div>
+            <div class="hud-kicker" id="cue-kicker">YOUR SAVED MEMORY</div>
+            <h3 class="social-hud-title" id="cue-title">START WITH CURIOSITY</h3>
+            <p class="social-hud-subtitle" id="cue-subtitle">What has been exciting lately?</p>
           </div>
-          <div class="hud-end" id="cue-footer">USER-SELECTED · NOT AUTOMATIC</div>
+          <div class="hud-end"><span id="cue-footer">YOUR SAVED MEMORY</span><span id="progress-label">1 / 3</span></div>
         </div>
-        <p id="progress-label" class="progress-label">Card 1 of 3</p>
-        <div class="inline-actions cue-actions">
-          <button type="button" id="prev-cue" class="secondary-action">← Previous</button>
-          <button type="button" id="next-cue" class="primary-action">Next card →</button>
-          <button type="button" id="dismiss-cue" class="text-action">Dismiss</button>
-        </div>
-        <div class="display-options">
-          <div><label for="display-size">Preview text size</label><select id="display-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></div>
-          <div><label for="display-place">Preview position</label><select id="display-place"><option value="top">Top</option><option value="center" selected>Center</option><option value="bottom">Bottom</option></select></div>
-          <div><label for="display-font">Preview font</label><select id="display-font"><option value="mono" selected>Monospace</option><option value="sans">Sans serif</option></select></div>
-        </div>
-        <p class="subtle" id="demo-status" role="status">This is a browser preview. Nothing is being sent to the glasses.</p>
-        <details class="debug">
-          <summary>Show the message our teammate can connect</summary>
-          <pre id="display-packet-json"></pre>
-          <p class="subtle">This is FAMILIAR's hardware-independent message format, not a device SDK command. The glasses teammate will translate it using the real SDK.</p>
-        </details>
-      </section>
-    </section>
 
-    <footer><span>LOOKS FAMILIAR · SOUNDS FAMILIAR · FEELS FAMILIAR</span><span>CONVERSATION STARTER + SOCIAL NAVIGATOR</span></footer>
-  </main>
+        <div class="cue-actions">
+          <button type="button" id="prev-cue" class="secondary-action">← Back</button>
+          <button type="button" id="next-cue" class="primary-action">Next cue →</button>
+          <button type="button" id="dismiss-cue" class="text-action">Hide</button>
+        </div>
+
+        <details class="display-options">
+          <summary>Display preferences</summary>
+          <div class="display-options-grid">
+            <div><label for="display-size">Text size</label><select id="display-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></div>
+            <div><label for="display-place">Cue position</label><select id="display-place"><option value="top">Top</option><option value="center" selected>Center</option><option value="bottom">Bottom</option></select></div>
+            <div><label for="display-font">Preview font</label><select id="display-font"><option value="mono" selected>Monospace</option><option value="sans">Sans serif</option></select></div>
+          </div>
+        </details>
+
+        <p class="subtle demo-status" id="demo-status" role="status">This is a browser preview. Nothing is being sent to the glasses.</p>
+        <details class="debug"><summary>Show the hardware handoff message</summary><pre id="display-packet-json"></pre><p class="subtle">This is FAMILIAR’s hardware-independent message format, not a device SDK command. A verified device adapter still needs to connect it to the official glasses SDK.</p></details>
+      </section>
+    </main>
+
+    <footer class="social-footer"><span>FAMILIAR · SECOND NATURE</span><span>YOUR NOTES. YOUR MOMENT. YOUR CHOICE.</span></footer>
+  </div>
 </body>
 </html>
