@@ -2,30 +2,50 @@
 
 **Looks Familiar. Sounds Familiar. Feels Familiar.**
 
-We are building **three features** for our smart-glasses hackathon project—nothing else:
+Our team is building three features:
+1. **Proximity Alerts** — our teammate's work; current browser input is simulated.
+2. **Conversation Starter** — save memories about people you know and browse short reminder cards.
+3. **Social Navigator** — choose a social situation and browse short conversation cues.
 
-| Feature | What it does | Demo status |
-|---|---|---|
-| **1. Proximity Alerts** | A short look-up alert when phone distraction and closeness to a staged object occur together. | **Simulated** distance/attention in browser. Teammate is working on real glasses. |
-| **2. Conversation Starter** | Pick someone you have met, view short memory cards about them, and get ideas for what to say. | Manual browser demo. **No face recognition** yet. |
-| **3. Social Navigator** | Choose a social situation and step through short, helpful conversation cues. | Manual browser demo. **No live listening** yet. |
+## Run the phone/browser prototype
 
-## Run it
+From the project folder:
 
-1. Download or clone this repository.
-2. In the project folder, run `py -m http.server 8000` (Windows) or `python3 -m http.server 8000`.
-3. Open **http://localhost:8000**. Choose one of the three features at the top.
+```powershell
+py -m http.server 8000
+```
 
-Optional: run `npm test` if Node.js is installed.
+Open **http://localhost:8000/social.html** for Conversation Starter and Social Navigator. The page is responsive and can be opened in a phone browser on the same local network if the computer firewall permits it.
 
-## What's real, and what's a demo?
+Run the logic tests (Node.js required):
 
-- Browser buttons, profile notes, social cue navigation, and simulated alerts work without the glasses.
-- **The code is not connected to the glasses**, and it does not identify faces or measure real distance.
-- The glasses hardware teammate will connect verified text-display functions when an official SDK example works on the actual device.
-- **Proximity Alerts is not a safety device.** Never test it around real traffic, roads, tracks, platform edges, or drop-offs.
-- Use only fictional examples or details the person has agreed you can store. Browser notes stay local; do not commit personal profiles or photos.
+```powershell
+npm test
+```
 
-## Team split
+## Our two social features
 
-One teammate can continue Proximity Alerts and hardware testing. Another can build Conversation Starter and Social Navigator without the glasses. Keep new changes separate so they can be merged without overwriting each other's work.
+- Conversation Starter supports multiple manually entered profiles, local save/edit/delete, and one-card-at-a-time reminders.
+- Social Navigator has five user-selected situations with three optional prompts each.
+- Profiles are stored in this browser's local storage. There is no cloud sync, camera, microphone, face recognition, or account system.
+- Use fictional sample data or details a person has agreed you can save. Do not commit personal profiles or photos to GitHub.
+
+## How the glasses teammate connects this later
+
+The social logic is separate from hardware. Both features produce a small message object using **FAMILIAR Display Contract v1**, implemented in `src/hardware/display-contract.js`.
+
+A message contains:
+- `schema`: contract version
+- `feature`: `conversation` or `navigator`
+- `visible`: show a card or clear the display
+- `title` and `body`: text for the display
+- `cardIndex` and `cardCount`: current position
+- `actions`: logical `previous`, `next`, and `dismiss` actions
+
+The teammate can map those fields to the **actual documented glasses SDK** after getting one real text message to display on the physical glasses. The contract is not itself an SDK call. Display size, font, coordinates, buttons, camera, and face recognition are not assumed.
+
+The current browser preview is not connected to the glasses. No hardware capability is claimed as verified.
+
+## Proximity safety
+
+The proximity feature is a software simulation, not a safety device. Do not test it around real traffic, roads, railway tracks, platform edges, or drop-offs.
