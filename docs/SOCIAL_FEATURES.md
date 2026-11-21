@@ -82,7 +82,7 @@ The new `glasses-android/` directory contains actual native Android code adapted
 - Fictional Sunny cards and Social Navigator situations, including networking and dating, usable without keeping the phone browser open.
 - M6-template touchpad key handlers for swipe / tap / double-tap, **not yet verified on the physical glasses**.
 - Foreground service and optional accessibility boot helper; no device settings changed by the team-building tools.
-- Optional same-origin phone remote served by the glasses at `http://<glasses-ip>:8080`, protected by a random code displayed on the glasses. **HTTP is not encrypted: use fictional/test data on a trusted private hotspot only.** The hosted HTTPS Vercel app does not connect directly to this remote.
+- Optional same-origin phone remote served by the glasses at `http://<glasses-ip>:8081`, protected by a random code displayed on the glasses. **HTTP is not encrypted: use fictional/test data on a trusted private hotspot only.** The hosted HTTPS Vercel app does not connect directly to this remote.
 - Optional opt-in Android camera face-presence experiment. A face callback indicates only that a face is in view, **not who it is**. Showing fictional Sunny's memory after detection requires **explicit wearer confirmation**. Automatic face identification is NOT implemented.
 - GitHub Actions workflow builds an APK; a successful run provides the downloadable `FAMILIAR-M6-debug-apk` artifact.
 

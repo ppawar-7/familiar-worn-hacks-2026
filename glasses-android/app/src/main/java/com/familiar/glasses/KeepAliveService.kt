@@ -22,7 +22,7 @@ class KeepAliveService : Service() {
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .build()
         startForeground(1, notification)
-        server = ControlServer(applicationContext, 8080).also { it.start() }
+        server = ControlServer(applicationContext, Config.REMOTE_PORT).also { it.start() }
         Log.i("FAMILIAR", "Foreground service started (no profile data in logs)")
     }
 

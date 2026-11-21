@@ -37,7 +37,7 @@ This is the **Android glasses app source**, built from the provided `GlassesAppT
 
 With the glasses installed, running, and on the same **private hotspot** as your phone:
 
-1. Read the `http://<glasses-ip>:8080` address from the glasses.
+1. Read the `http://<glasses-ip>:8081` address from the glasses.
 2. Type that **HTTP** address into the phone browser. Do **not** use the public Vercel site for hardware commands.
 3. Enter the 12-character code displayed on the glasses.
 4. Choose Sunny, Networking, or Dating; choose a timer; press **Start on glasses**.

@@ -162,7 +162,7 @@ class MainActivity : Activity() {
         }
         val ip = wifiAddress()
         helpView.text = "← / → options or cards · TAP run/stop · DOUBLE TAP exit\n" +
-            if (ip != null) "Phone: http://" + ip + ":8080   Code: " + Pairing.code
+            if (ip != null) "Phone: http://" + ip + ":" + Config.REMOTE_PORT + "   Code: " + Pairing.code
             else "Phone remote: connect glasses to Wi-Fi"
     }
 
